@@ -325,7 +325,7 @@
       </div>
       <div class="card-body" style="padding:0;">
         <div id="swimlane-wrap" style="padding:20px 24px 8px;">
-                    <svg id="swimlane-svg" viewBox="0 0 1415 585" xmlns="http://www.w3.org/2000/svg"
+                    <svg id="swimlane-svg" viewBox="0 0 1600 585" xmlns="http://www.w3.org/2000/svg"
                style="width:100%;height:auto;min-height:380px;display:block;font-family:Inter,system-ui,sans-serif;">
             <defs>
               <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
@@ -340,10 +340,10 @@
             </defs>
 
             <!-- Lane backgrounds -->
-            <rect x="0" y="0" width="1415" height="110" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
-            <rect x="0" y="110" width="1415" height="220" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
-            <rect x="0" y="330" width="1415" height="100" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1"/>
-            <rect x="0" y="430" width="1415" height="155" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+            <rect x="0" y="0" width="1600" height="110" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+            <rect x="0" y="110" width="1600" height="220" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+            <rect x="0" y="330" width="1600" height="100" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1"/>
+            <rect x="0" y="430" width="1600" height="155" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
 
             <!-- Label column -->
             <rect x="0" y="0" width="125" height="585" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
@@ -365,26 +365,22 @@
             <rect x="130" y="36" width="114" height="38" rx="19" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
             <text x="187" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">&#9654; Event triggered</text>
             <text x="187" y="66" text-anchor="middle" font-size="10" fill="#16a34a">BuzzNet API Svc</text>
-            <!-- resolveCampaign cx=314 -->
-            <rect x="257" y="35" width="114" height="40" rx="5" fill="#f0fdfa" stroke="#14b8a6" stroke-width="1.5"/>
-            <text x="314" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#134e4a">resolveCampaign</text>
-            <text x="314" y="66" text-anchor="middle" font-size="10" fill="#0d9488">fixed campaign</text>
-            <!-- B1_SIGN cx=441 -->
-            <rect x="384" y="35" width="114" height="40" rx="5" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-            <text x="441" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#3b0764">signEventPayload</text>
-            <text x="441" y="66" text-anchor="middle" font-size="10" fill="#7c3aed">HMAC-SHA256</text>
+            <!-- B1_SIGN cx=377 -->
+            <rect x="320" y="35" width="114" height="40" rx="5" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="377" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#3b0764">signEventPayload</text>
+            <text x="377" y="66" text-anchor="middle" font-size="10" fill="#7c3aed">HMAC-SHA256</text>
             <!-- B2_AUTH cx=568 -->
             <rect x="511" y="35" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
             <text x="568" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">buildAuthHeader</text>
             <text x="568" y="66" text-anchor="middle" font-size="10" fill="#3b82f6">API key / S2S</text>
-            <!-- E401 oval cx=786 -->
-            <rect x="726" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
-            <text x="786" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 401 Unauthorized</text>
-            <text x="786" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Auth / Sig failed</text>
-            <!-- E400 oval cx=967 -->
-            <rect x="907" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
-            <text x="967" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 400 Bad Schema</text>
-            <text x="967" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Invalid schema</text>
+            <!-- E401 oval cx=840 (aligned with GW1) -->
+            <rect x="780" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="840" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 401 Unauthorized</text>
+            <text x="840" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Auth / Sig failed</text>
+            <!-- E400 oval cx=1076 (aligned with GW2) -->
+            <rect x="1016" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="1076" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 400 Bad Schema</text>
+            <text x="1076" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Invalid schema</text>
             <!-- S2S label -->
             <text x="574" y="106" text-anchor="start" font-size="9" fill="#94a3b8" font-style="italic">&#9660; POST /events &#xB7; server-to-server</text>
 
@@ -393,93 +389,92 @@
             <rect x="511" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
             <text x="568" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">POST /events</text>
             <text x="568" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">generateEventId</text>
-            <!-- A2 cx=695 -->
-            <rect x="638" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
-            <text x="695" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">validateAuth &amp; Sig</text>
-            <text x="695" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">S2S creds + HMAC</text>
-            <!-- GW1 diamond cx=786 cy=220 -->
-            <polygon points="786,199 807,220 786,241 765,220" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
-            <text x="786" y="217" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Auth</text>
-            <text x="786" y="229" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">&amp;Sig?</text>
-            <!-- A3 cx=876 -->
-            <rect x="819" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
-            <text x="876" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">validateEventSchema</text>
-            <text x="876" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">JSON / Avro</text>
-            <!-- GW2 diamond cx=967 cy=220 -->
-            <polygon points="967,199 988,220 967,241 946,220" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
-            <text x="967" y="217" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Schema</text>
-            <text x="967" y="229" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">valid?</text>
-            <!-- A4 cx=1057 -->
-            <rect x="1000" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
-            <text x="1057" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">enrichEventMetadata</text>
-            <text x="1057" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">ip &#xB7; session &#xB7; source</text>
-            <!-- FRAUD cx=1187 -->
-            <rect x="1127" y="196" width="120" height="48" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
-            <text x="1187" y="214" text-anchor="middle" font-size="11" font-weight="600" fill="#78350f">Fraud Detection</text>
-            <text x="1187" y="228" text-anchor="middle" font-size="10" fill="#d97706">4 parallel checks</text>
-            <text x="1187" y="240" text-anchor="middle" font-size="9" fill="#b45309">dup &#xB7; anomaly &#xB7; bot &#xB7; IP</text>
+            <!-- A2 cx=722 -->
+            <rect x="665" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="722" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">validateAuth &amp; Sig</text>
+            <text x="722" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">S2S creds + HMAC</text>
+            <!-- GW1 diamond cx=840 cy=220 -->
+            <polygon points="840,199 861,220 840,241 819,220" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="840" y="217" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Auth</text>
+            <text x="840" y="229" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">&amp;Sig?</text>
+            <!-- A3 cx=958 -->
+            <rect x="901" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="958" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">validateEventSchema</text>
+            <text x="958" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">JSON / Avro</text>
+            <!-- GW2 diamond cx=1076 cy=220 -->
+            <polygon points="1076,199 1097,220 1076,241 1055,220" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="1076" y="217" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Schema</text>
+            <text x="1076" y="229" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">valid?</text>
+            <!-- A4 cx=1194 -->
+            <rect x="1137" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="1194" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">enrichEventMetadata</text>
+            <text x="1194" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">ip &#xB7; session &#xB7; source</text>
+            <!-- FRAUD cx=1351 -->
+            <rect x="1291" y="196" width="120" height="48" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="1351" y="214" text-anchor="middle" font-size="11" font-weight="600" fill="#78350f">Fraud Detection</text>
+            <text x="1351" y="228" text-anchor="middle" font-size="10" fill="#d97706">4 parallel checks</text>
+            <text x="1351" y="240" text-anchor="middle" font-size="9" fill="#b45309">dup &#xB7; anomaly &#xB7; bot &#xB7; IP</text>
 
             <!-- NODES: KCH lane (cy=380) -->
-            <!-- K1 cx=1057 below A4 -->
-            <rect x="1000" y="360" width="114" height="40" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
-            <text x="1057" y="377" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">publishToKafka</text>
-            <text x="1057" y="391" text-anchor="middle" font-size="10" fill="#16a34a">consume &#xB7; 7d retention</text>
-            <!-- C1 cx=1187 below FRAUD -->
-            <rect x="1127" y="360" width="120" height="40" rx="5" fill="#cffafe" stroke="#0891b2" stroke-width="1.5"/>
-            <text x="1187" y="377" text-anchor="middle" font-size="11" font-weight="600" fill="#0c4a6e">insertEvent</text>
-            <text x="1187" y="391" text-anchor="middle" font-size="10" fill="#0891b2">ClickHouse &#xB7; append-only</text>
+            <!-- K1 cx=1194 below A4 -->
+            <rect x="1137" y="360" width="114" height="40" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="1194" y="377" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">publishToKafka</text>
+            <text x="1194" y="391" text-anchor="middle" font-size="10" fill="#16a34a">consume &#xB7; 7d retention</text>
+            <!-- C1 cx=1351 below FRAUD -->
+            <rect x="1291" y="360" width="120" height="40" rx="5" fill="#cffafe" stroke="#0891b2" stroke-width="1.5"/>
+            <text x="1351" y="377" text-anchor="middle" font-size="11" font-weight="600" fill="#0c4a6e">insertEvent</text>
+            <text x="1351" y="391" text-anchor="middle" font-size="10" fill="#0891b2">ClickHouse &#xB7; append-only</text>
 
             <!-- NODES: Monitoring lane -->
-            <!-- GW3 diamond cx=1100 cy=510 -->
-            <polygon points="1100,489 1121,510 1100,531 1079,510" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
-            <text x="1100" y="507" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Fraud</text>
-            <text x="1100" y="519" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
-            <!-- M1 cx=1220 cy=478 -->
-            <rect x="1160" y="458" width="120" height="40" rx="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
-            <text x="1220" y="475" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">triggerAlert</text>
-            <text x="1220" y="489" text-anchor="middle" font-size="10" fill="#ef4444">Anomaly / Bot / IP</text>
-            <!-- EEND oval cx=1340 cy=556 -->
-            <rect x="1282" y="537" width="116" height="38" rx="19" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
-            <text x="1340" y="553" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">&#9989; Event Stored</text>
-            <text x="1340" y="567" text-anchor="middle" font-size="10" fill="#16a34a">Audit trail preserved</text>
+            <!-- GW3 diamond cx=1264 cy=510 -->
+            <polygon points="1264,489 1285,510 1264,531 1243,510" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="1264" y="507" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Fraud</text>
+            <text x="1264" y="519" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
+            <!-- M1 cx=1384 cy=478 -->
+            <rect x="1324" y="458" width="120" height="40" rx="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="1384" y="475" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">triggerAlert</text>
+            <text x="1384" y="489" text-anchor="middle" font-size="10" fill="#ef4444">Anomaly / Bot / IP</text>
+            <!-- EEND oval cx=1504 cy=556 -->
+            <rect x="1446" y="537" width="116" height="38" rx="19" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="1504" y="553" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">&#9989; Event Stored</text>
+            <text x="1504" y="567" text-anchor="middle" font-size="10" fill="#16a34a">Audit trail preserved</text>
 
             <!-- EDGES -->
-            <line x1="244" y1="55" x2="257" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <line x1="371" y1="55" x2="384" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <line x1="498" y1="55" x2="511" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="244" y1="55" x2="320" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="434" y1="55" x2="511" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- B2_AUTH to A1: S2S straight down dashed -->
             <path d="M 568 75 L 568 200" stroke="#64748b" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arr)"/>
-            <line x1="625" y1="220" x2="638" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <line x1="752" y1="220" x2="765" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="625" y1="220" x2="665" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="779" y1="220" x2="819" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- GW1 fail to E401 -->
-            <path d="M 786 199 L 786 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
-            <rect x="762" y="126" width="30" height="14" rx="2" fill="#fff7ed"/>
-            <text x="777" y="136" text-anchor="middle" font-size="9" fill="#ef4444">&#10005; Fail</text>
+            <path d="M 840 199 L 840 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+            <rect x="816" y="126" width="30" height="14" rx="2" fill="#fff7ed"/>
+            <text x="831" y="136" text-anchor="middle" font-size="9" fill="#ef4444">&#10005; Fail</text>
             <!-- GW1 pass to A3 -->
-            <line x1="807" y1="220" x2="819" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <text x="813" y="214" text-anchor="middle" font-size="9" fill="#16a34a">&#10003;</text>
-            <line x1="933" y1="220" x2="946" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="861" y1="220" x2="901" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="881" y="214" text-anchor="middle" font-size="9" fill="#16a34a">&#10003;</text>
+            <line x1="1015" y1="220" x2="1055" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- GW2 fail to E400 -->
-            <path d="M 967 199 L 967 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
-            <rect x="950" y="126" width="18" height="14" rx="2" fill="#fff7ed"/>
-            <text x="959" y="136" text-anchor="middle" font-size="9" fill="#ef4444">&#10005;</text>
+            <path d="M 1076 199 L 1076 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+            <rect x="1053" y="126" width="30" height="14" rx="2" fill="#fff7ed"/>
+            <text x="1068" y="136" text-anchor="middle" font-size="9" fill="#ef4444">&#10005; Fail</text>
             <!-- GW2 pass to A4 -->
-            <line x1="988" y1="220" x2="1000" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <text x="994" y="214" text-anchor="middle" font-size="9" fill="#16a34a">&#10003;</text>
-            <line x1="1114" y1="220" x2="1127" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="1097" y1="220" x2="1137" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="1117" y="214" text-anchor="middle" font-size="9" fill="#16a34a">&#10003;</text>
+            <line x1="1251" y1="220" x2="1291" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- FRAUD to K1 cross-lane -->
-            <path d="M 1187 244 L 1187 310 L 1057 310 L 1057 360" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-            <line x1="1114" y1="380" x2="1127" y2="380" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <path d="M 1351 244 L 1351 310 L 1194 310 L 1194 360" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+            <line x1="1251" y1="380" x2="1291" y2="380" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- C1 to GW3 cross-lane -->
-            <path d="M 1187 400 L 1187 440 L 1100 440 L 1100 489" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+            <path d="M 1351 400 L 1351 440 L 1264 440 L 1264 489" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
             <!-- GW3 Yes to M1 -->
-            <path d="M 1121 510 L 1140 510 L 1140 478 L 1160 478" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#arr-red)"/>
-            <text x="1123" y="499" text-anchor="start" font-size="9" font-weight="600" fill="#ef4444">Yes</text>
+            <path d="M 1285 510 L 1304 510 L 1304 478 L 1324 478" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#arr-red)"/>
+            <text x="1287" y="499" text-anchor="start" font-size="9" font-weight="600" fill="#ef4444">Yes</text>
             <!-- M1 to EEND -->
-            <path d="M 1280 478 L 1340 478 L 1340 537" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+            <path d="M 1444 478 L 1504 478 L 1504 537" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
             <!-- GW3 No to EEND -->
-            <path d="M 1100 531 L 1100 555 L 1275 555" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
-            <text x="1187" y="549" text-anchor="middle" font-size="9" font-weight="600" fill="#16a34a">No (no fraud)</text>
+            <path d="M 1264 531 L 1264 555 L 1446 555" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
+            <text x="1355" y="549" text-anchor="middle" font-size="9" font-weight="600" fill="#16a34a">No (no fraud)</text>
 
           </svg>
         </div>
@@ -492,7 +487,6 @@
         <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div>ClickHouse storage</div>
         <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Error / Alert</div>
         <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div>Decision gateway</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#14b8a6"></div>Campaign</div>
       </div>
     </div>
 
@@ -631,6 +625,7 @@
   <span style="color:#16a34a">"event_id"</span>:        <span style="color:#7c3aed">"uuid-v4"</span>,            <span style="color:#94a3b8">// Auto-generated</span>
   <span style="color:#16a34a">"user_id"</span>:         <span style="color:#7c3aed">"user_123"</span>,
   <span style="color:#16a34a">"guild_member_id"</span>: <span style="color:#7c3aed">"g_456"</span>,
+  <span style="color:#16a34a">"campaign_id"</span>:      <span style="color:#b45309">1001</span>,
   <span style="color:#16a34a">"event_type"</span>:      <span style="color:#7c3aed">"task_completed"</span>,
   <span style="color:#16a34a">"timestamp"</span>:       <span style="color:#7c3aed">"2026-03-21T10:00:00Z"</span>,
   <span style="color:#16a34a">"schema_version"</span>:  <span style="color:#7c3aed">"1.0"</span>,
