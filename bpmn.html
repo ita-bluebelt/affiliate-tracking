@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuzzNet – Affiliate Tracking BPMN</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────── */
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: #2563eb; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+    }
+    .logo-text h1 { font-size: 16px; font-weight: 700; color: #0f172a; line-height: 1; }
+    .logo-text p  { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .header-meta { font-size: 12px; color: #94a3b8; }
+    .header-meta strong { color: #64748b; }
+
+    /* ── Nav tabs ──────────────────────────────── */
+    .nav-tabs {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 40px;
+      display: flex;
+      gap: 2px;
+    }
+    .nav-tab {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .nav-tab:hover { color: #1e293b; }
+    .nav-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+    /* ── Main content ──────────────────────────── */
+    main { padding: 32px 40px; max-width: 1600px; margin: 0 auto; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── Section title ─────────────────────────── */
+    .section-header { margin-bottom: 24px; }
+    .section-header h2 { font-size: 20px; font-weight: 700; color: #0f172a; }
+    .section-header p  { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+    /* ── Card ──────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-header h3 { font-size: 14px; font-weight: 600; color: #0f172a; }
+    .card-header p  { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .card-body { padding: 24px; }
+
+    /* ── Mermaid diagram ───────────────────────── */
+    .diagram-wrap {
+      overflow-x: auto;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .mermaid { min-width: 700px; }
+
+    /* ── Legend ────────────────────────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #475569;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── Flow description ──────────────────────── */
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      padding: 20px;
+    }
+    .flow-step {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+    }
+    .flow-step-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .flow-step-content h4 { font-size: 13px; font-weight: 600; color: #0f172a; }
+    .flow-step-content p  { font-size: 12px; color: #64748b; margin-top: 2px; line-height: 1.5; }
+    .badge-flag {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      margin-top: 4px;
+    }
+
+    /* ── Event taxonomy ────────────────────────── */
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      padding: 20px;
+    }
+    .event-group h4 {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .event-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 2px 3px 2px 0;
+    }
+    .event-tag-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .tag-blue   { background: #dbeafe; color: #1d4ed8; }
+    .tag-green  { background: #dcfce7; color: #16a34a; }
+    .tag-purple { background: #ede9fe; color: #7c3aed; }
+    .tag-amber  { background: #fef3c7; color: #b45309; }
+    .tag-cyan   { background: #cffafe; color: #0e7490; }
+
+    /* ── Architecture table ────────────────────── */
+    .arch-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .arch-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .arch-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    .arch-table tr:last-child td { border-bottom: none; }
+    .arch-table tr:hover td { background: #f8fafc; }
+    .layer-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .func-list { margin: 0; padding: 0; list-style: none; }
+    .func-list li {
+      font-size: 11px;
+      color: #475569;
+      font-family: 'Courier New', monospace;
+      padding: 1px 0;
+    }
+    .func-count {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* ── Risk table ────────────────────────────── */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+    .risk-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .risk-card-header {
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .risk-card-body {
+      padding: 10px 14px;
+      background: #f8fafc;
+    }
+    .risk-card-body li {
+      font-size: 12px;
+      color: #475569;
+      padding: 3px 0;
+      padding-left: 14px;
+      position: relative;
+    }
+    .risk-card-body li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: #94a3b8;
+      font-size: 10px;
+    }
+
+    /* ── Scrollbar ─────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ Header ══════════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">BN</div>
+    <div class="logo-text">
+      <h1>BuzzNet – Affiliate Tracking</h1>
+      <p>Process Flow & System Architecture</p>
+    </div>
+  </div>
+  <div class="header-meta">
+    <strong>Timeline:</strong> Mar 21 – Apr 4, 2026 &nbsp;·&nbsp;
+    <strong>Stack:</strong> Node.js · Kafka · ClickHouse
+  </div>
+</header>
+
+<!-- ═══ Navigation ══════════════════════════════════════════ -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showSection('process')">Process Flow (BPMN)</div>
+  <div class="nav-tab" onclick="showSection('events')">Event Taxonomy</div>
+  <div class="nav-tab" onclick="showSection('functions')">Function List</div>
+  <div class="nav-tab" onclick="showSection('risks')">Risk & Mitigation</div>
+</div>
+
+<!-- ═══ Main ════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ─── TAB: Process Flow ────────────────────────────────── -->
+  <div id="section-process" class="section active">
+    <div class="section-header">
+      <h2>Event Processing Flow</h2>
+      <p>Full lifecycle of an affiliate tracking event — from BuzzNet client to ClickHouse storage</p>
+    </div>
+
+    <!-- Main BPMN Diagram -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Main Process Flow</h3>
+          <p>End-to-end event ingestion pipeline with fraud detection and audit trail</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram-wrap">
+          <div class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#dbeafe",
+    "primaryTextColor": "#1e3a5f",
+    "primaryBorderColor": "#3b82f6",
+    "lineColor": "#94a3b8",
+    "secondaryColor": "#f0fdf4",
+    "tertiaryColor": "#fef3c7",
+    "background": "#ffffff",
+    "nodeBorder": "#cbd5e1",
+    "clusterBkg": "#f8fafc",
+    "clusterBorder": "#e2e8f0",
+    "titleColor": "#0f172a",
+    "edgeLabelBackground": "#ffffff",
+    "fontSize": "13px"
+  }
+}}%%
+flowchart TD
+    classDef task        fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f,rx:6
+    classDef taskGreen   fill:#dcfce7,stroke:#16a34a,color:#14532d,rx:6
+    classDef taskPurple  fill:#ede9fe,stroke:#7c3aed,color:#3b0764,rx:6
+    classDef taskAmber   fill:#fef3c7,stroke:#f59e0b,color:#78350f,rx:6
+    classDef taskCyan    fill:#cffafe,stroke:#0891b2,color:#0c4a6e,rx:6
+    classDef taskRed     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d,rx:6
+    classDef gateway     fill:#fef9c3,stroke:#eab308,color:#713f12
+    classDef startEvt    fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef endOk       fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef endErr      fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+    classDef gwJoin      fill:#f0fdf4,stroke:#16a34a,color:#14532d
+
+    START(["▶  User performs action in BuzzNet"]):::startEvt
+
+    subgraph API["⚙️  Tracking API  ·  Node.js"]
+      direction TB
+      A1["POST /events  or  /events/batch\n— generateEventId · UUID-v4"]:::task
+      A2["authenticateRequest\nAPI key / OAuth2"]:::task
+      GW1{Authenticated?}:::gateway
+      E401(["✕  Reject 401\nUnauthorized"]):::endErr
+      A3["validateEventSchema\nJSON / Avro — reject 400 if invalid"]:::task
+      GW2{Schema Valid?}:::gateway
+      E400(["✕  Reject 400\nInvalid Schema"]):::endErr
+      A4["enrichEventMetadata\nip · session_id · source · user_agent · schema_version"]:::task
+
+      subgraph FRAUD["🔍  Fraud Signal Detection  —  flag only, never reject"]
+        direction LR
+        F1["checkDuplicate\nIdempotency key"]:::taskAmber
+        F2["checkAnomalyBehavior\nRapid consecutive events"]:::taskAmber
+        F3["checkBotPattern\nAction patterns"]:::taskAmber
+        F4["checkIpReputation\nBlacklist / suspicious IPs"]:::taskAmber
+      end
+
+      A5["buildFraudSignals\nConsolidated fraud_signals object"]:::taskAmber
+      A6["signEvent\nHMAC-SHA256 — tamper-proof integrity"]:::taskPurple
+    end
+
+    subgraph KAFKA["📨  Kafka  ·  Streaming Bus"]
+      direction LR
+      K1["publishEventToKafka\nPartition by user_id"]:::taskGreen
+      K2["consumeEventFromKafka\n7-day retention for replay"]:::taskGreen
+    end
+
+    subgraph CH["🗄️  ClickHouse  ·  Event Storage"]
+      C1["insertEvent\nAppend-only · No updates · No deletes"]:::taskCyan
+    end
+
+    subgraph MON["📊  Monitoring & Audit"]
+      direction TB
+      GW3{"Has Fraud\nSignals?"}:::gateway
+      M1["triggerAlert\nAnomaly / Bot / IP / Duplicate"]:::taskRed
+      EEND(["✅  Event Stored Successfully\nAudit trail preserved"]):::endOk
+    end
+
+    %% Main flow
+    START --> A1
+    A1    --> A2
+    A2    --> GW1
+    GW1   -->|"❌ Fail"| E401
+    GW1   -->|"✓ Pass"| A3
+    A3    --> GW2
+    GW2   -->|"❌ Invalid"| E400
+    GW2   -->|"✓ Valid"| A4
+
+    %% Parallel fraud checks
+    A4 --> F1
+    A4 --> F2
+    A4 --> F3
+    A4 --> F4
+    F1 --> A5
+    F2 --> A5
+    F3 --> A5
+    F4 --> A5
+
+    %% Continue
+    A5 --> A6
+    A6 --> K1
+    K1 --> K2
+    K2 --> C1
+    C1 --> GW3
+    GW3 -->|"Yes"| M1
+    GW3 -->|"No" | EEND
+    M1  --> EEND
+          </div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Tracking API tasks</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Fraud detection (flag only)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Signing / HMAC</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Kafka streaming</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div>ClickHouse storage</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Error / Alert</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div>Decision gateway</div>
+      </div>
+    </div>
+
+    <!-- Step-by-step description -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Step-by-Step Description</h3>
+          <p>8 processing stages for every event</p>
+        </div>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-content">
+            <h4>Event Ingestion</h4>
+            <p>BuzzNet client calls <code>POST /events</code> or <code>/events/batch</code>. A UUID-v4 event_id is generated for each event.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-content">
+            <h4>Authentication</h4>
+            <p>Request authenticated via API key or OAuth2. Unauthorized requests are rejected with <strong>401</strong>.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-content">
+            <h4>Schema Validation</h4>
+            <p>Event schema validated against JSON/Avro definition. Invalid events rejected with <strong>400</strong>.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <div class="flow-step-content">
+            <h4>Metadata Enrichment</h4>
+            <p>Metadata attached: <code>ip</code>, <code>session_id</code>, <code>source</code>, <code>user_agent</code>, <code>schema_version</code>.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">5</div>
+          <div class="flow-step-content">
+            <h4>Fraud Signal Detection</h4>
+            <p>4 checks run in parallel. Events are <strong>always recorded</strong> — checks only set flags.</p>
+            <span class="badge-flag">is_duplicate</span>
+            <span class="badge-flag">anomaly_detected</span>
+            <span class="badge-flag">bot_suspected</span>
+            <span class="badge-flag">ip_flagged</span>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">6</div>
+          <div class="flow-step-content">
+            <h4>Build Fraud Signals</h4>
+            <p>All detection results aggregated into a single <code>fraud_signals</code> object attached to the event.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">7</div>
+          <div class="flow-step-content">
+            <h4>Sign & Publish</h4>
+            <p>Event signed with <strong>HMAC-SHA256</strong> for tamper-proof integrity, then published to Kafka partitioned by <code>user_id</code>.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">8</div>
+          <div class="flow-step-content">
+            <h4>Store & Monitor</h4>
+            <p>Kafka consumer writes to ClickHouse (append-only). If fraud signals present → alert triggered. Event stored regardless.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: Event Taxonomy ──────────────────────────────── -->
+  <div id="section-events" class="section">
+    <div class="section-header">
+      <h2>Event Taxonomy</h2>
+      <p>All event types captured by the affiliate tracking system</p>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="event-grid">
+          <div class="event-group">
+            <h4>User Actions</h4>
+            <span class="event-tag tag-blue">post_created</span>
+            <span class="event-tag tag-blue">share_executed</span>
+            <span class="event-tag tag-blue">comment_created</span>
+            <span class="event-tag tag-blue">follow_executed</span>
+          </div>
+          <div class="event-group">
+            <h4>Engagement Signals</h4>
+            <span class="event-tag tag-cyan">like_executed</span>
+            <span class="event-tag tag-cyan">link_clicked</span>
+            <span class="event-tag tag-cyan">media_viewed</span>
+            <span class="event-tag tag-cyan">reaction_added</span>
+          </div>
+          <div class="event-group">
+            <h4>BuzzNet Core Events</h4>
+            <span class="event-tag tag-purple">task_assigned</span>
+            <span class="event-tag tag-purple">task_started</span>
+            <span class="event-tag tag-purple">task_completed</span>
+            <span class="event-tag tag-purple">content_viewed</span>
+          </div>
+          <div class="event-group">
+            <h4>Retention & Identity</h4>
+            <span class="event-tag tag-green">login</span>
+            <span class="event-tag tag-green">active_day</span>
+            <span class="event-tag tag-green">streak_milestone</span>
+            <span class="event-tag tag-green">account_connected</span>
+          </div>
+          <div class="event-group">
+            <h4>Guild & Rewards</h4>
+            <span class="event-tag tag-amber">guild_joined</span>
+            <span class="event-tag tag-amber">role_assigned</span>
+            <span class="event-tag tag-amber">reward_calculated</span>
+            <span class="event-tag tag-amber">payout_requested</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event flow for each type -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Event Data Schema (MVP)</h3>
+          <p>Minimum required fields for every event</p>
+        </div>
+      </div>
+      <div class="card-body" style="overflow-x:auto">
+        <pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;font-size:13px;line-height:1.7;color:#1e293b">{
+  <span style="color:#16a34a">"event_id"</span>:        <span style="color:#7c3aed">"uuid-v4"</span>,            <span style="color:#94a3b8">// Auto-generated</span>
+  <span style="color:#16a34a">"user_id"</span>:         <span style="color:#7c3aed">"user_123"</span>,
+  <span style="color:#16a34a">"guild_member_id"</span>: <span style="color:#7c3aed">"g_456"</span>,
+  <span style="color:#16a34a">"event_type"</span>:      <span style="color:#7c3aed">"task_completed"</span>,
+  <span style="color:#16a34a">"timestamp"</span>:       <span style="color:#7c3aed">"2026-03-21T10:00:00Z"</span>,
+  <span style="color:#16a34a">"schema_version"</span>:  <span style="color:#7c3aed">"1.0"</span>,
+  <span style="color:#16a34a">"properties"</span>: {
+    <span style="color:#0e7490">"task_id"</span>:   50,
+    <span style="color:#0e7490">"proof_url"</span>: <span style="color:#7c3aed">"https://x.com/..."</span>
+  },
+  <span style="color:#16a34a">"metadata"</span>: {
+    <span style="color:#0e7490">"source"</span>:     <span style="color:#7c3aed">"buzznet-web"</span>,
+    <span style="color:#0e7490">"ip"</span>:         <span style="color:#7c3aed">"192.168.1.1"</span>,
+    <span style="color:#0e7490">"session_id"</span>: <span style="color:#7c3aed">"sess_abc"</span>
+  },
+  <span style="color:#16a34a">"fraud_signals"</span>: {
+    <span style="color:#b45309">"is_duplicate"</span>:    false,
+    <span style="color:#b45309">"anomaly_detected"</span>: false,
+    <span style="color:#b45309">"bot_suspected"</span>:   false,
+    <span style="color:#b45309">"ip_flagged"</span>:      false
+  },
+  <span style="color:#16a34a">"hmac_signature"</span>: <span style="color:#7c3aed">"sha256:abc123..."</span>   <span style="color:#94a3b8">// Tamper-proof</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: Function List ───────────────────────────────── -->
+  <div id="section-functions" class="section">
+    <div class="section-header">
+      <h2>Function List</h2>
+      <p>43 functions across 7 system layers</p>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th style="width:200px">Layer</th>
+              <th style="width:60px">Count</th>
+              <th>Key Functions</th>
+              <th style="width:180px">Responsibility</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="layer-badge" style="background:#dbeafe;color:#1d4ed8">Tracking API</span></td>
+              <td><span class="func-count">8</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>POST /events · POST /events/batch</li>
+                  <li>validateEventSchema(event)</li>
+                  <li>authenticateRequest(req)</li>
+                  <li>rateLimitCheck(userId, ip)</li>
+                  <li>generateEventId()</li>
+                  <li>signEvent(event) — HMAC-SHA256</li>
+                  <li>enrichEventMetadata(event, req)</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">Ingestion, auth, validation, signing</td>
+            </tr>
+            <tr>
+              <td><span class="layer-badge" style="background:#fef3c7;color:#b45309">Fraud Detection</span></td>
+              <td><span class="func-count">5</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>checkDuplicate(event) → is_duplicate</li>
+                  <li>checkAnomalyBehavior(userId, eventType)</li>
+                  <li>checkBotPattern(event) → bot_suspected</li>
+                  <li>checkIpReputation(ip) → ip_flagged</li>
+                  <li>buildFraudSignals(checks)</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">Flag only — never reject or drop</td>
+            </tr>
+            <tr>
+              <td><span class="layer-badge" style="background:#dcfce7;color:#15803d">Kafka Streaming</span></td>
+              <td><span class="func-count">4</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>publishEventToKafka(event)</li>
+                  <li>consumeEventFromKafka()</li>
+                  <li>replayEventsFromKafka(from, to)</li>
+                  <li>partitionByUserId(event)</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">High-throughput buffering, ordering</td>
+            </tr>
+            <tr>
+              <td><span class="layer-badge" style="background:#cffafe;color:#0e7490">ClickHouse</span></td>
+              <td><span class="func-count">7</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>insertEvent(event)</li>
+                  <li>queryEventsByUser(userId, filters)</li>
+                  <li>queryEventsByCampaign(campaignId, filters)</li>
+                  <li>queryEventsByTimeRange(from, to, filters)</li>
+                  <li>aggregateUserActions(userId)</li>
+                  <li>getAuditTrail(userId)</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">Append-only columnar storage</td>
+            </tr>
+            <tr>
+              <td><span class="layer-badge" style="background:#ede9fe;color:#7c3aed">Business Events</span></td>
+              <td><span class="func-count">11</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>recordPostCreated · recordShareExecuted</li>
+                  <li>recordCommentCreated · recordFollowExecuted</li>
+                  <li>recordTaskAssigned · recordTaskCompleted</li>
+                  <li>recordContentViewed · recordActiveDay</li>
+                  <li>recordLogin · recordStreakMilestone</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">Domain-specific event handlers</td>
+            </tr>
+            <tr>
+              <td><span class="layer-badge" style="background:#fee2e2;color:#dc2626">Monitoring</span></td>
+              <td><span class="func-count">5</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>getRealtimeDashboardData()</li>
+                  <li>triggerAlert(alertType, data)</li>
+                  <li>searchAuditLog(filters)</li>
+                  <li>verifyLogIntegrity(eventId)</li>
+                  <li>exportAuditReport(filters)</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">Alerts, audit, compliance</td>
+            </tr>
+            <tr>
+              <td><span class="layer-badge" style="background:#f0fdf4;color:#16a34a">Schema Mgmt</span></td>
+              <td><span class="func-count">3</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>registerEventType(eventType, schema)</li>
+                  <li>getEventSchema(eventType)</li>
+                  <li>migrateSchema(version)</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">Extensible schema registry</td>
+            </tr>
+            <tr style="background:#f8fafc;font-weight:600">
+              <td>Total</td>
+              <td><span class="func-count" style="color:#2563eb">43</span></td>
+              <td colspan="2" style="font-size:12px;color:#475569">Across 7 layers — MVP scope</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: Risk & Mitigation ──────────────────────────── -->
+  <div id="section-risks" class="section">
+    <div class="section-header">
+      <h2>Risk Analysis & Mitigation</h2>
+      <p>Security, integrity and operational risk controls</p>
+    </div>
+
+    <div class="card">
+      <div class="risk-grid">
+        <div class="risk-card">
+          <div class="risk-card-header" style="background:#fee2e2;color:#991b1b">
+            🔐 Gateway Security
+          </div>
+          <ul class="risk-card-body">
+            <li>Mandatory authentication (API key / OAuth2)</li>
+            <li>Rate limiting per user/IP</li>
+            <li>IP & User-Agent filtering</li>
+            <li>Server-side tracking only — no client-only events</li>
+          </ul>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-header" style="background:#fef3c7;color:#92400e">
+            🔍 Processing Logic
+          </div>
+          <ul class="risk-card-body">
+            <li>Idempotency keys to prevent duplicate recording</li>
+            <li>Smart deduplication at ingestion layer</li>
+            <li>Anomaly detection for rapid consecutive events</li>
+            <li>Bot pattern recognition</li>
+          </ul>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-header" style="background:#dcfce7;color:#166534">
+            🗄️ Data Integrity
+          </div>
+          <ul class="risk-card-body">
+            <li>Append-only ClickHouse — no updates or deletes</li>
+            <li>HMAC-SHA256 signature on every event</li>
+            <li>Full audit traceability</li>
+            <li>Kafka 7-day retention for replay</li>
+          </ul>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-header" style="background:#ede9fe;color:#5b21b6">
+            📋 Compliance & IPO Readiness
+          </div>
+          <ul class="risk-card-body">
+            <li>Log integrity — tamper-proof records</li>
+            <li>Traceability — full audit trail per user</li>
+            <li>Evidence-grade dispute resolution</li>
+            <li>Audit report export (PDF / CSV)</li>
+          </ul>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-header" style="background:#cffafe;color:#0e7490">
+            🚀 Future Enhancements
+          </div>
+          <ul class="risk-card-body">
+            <li>Device attestation</li>
+            <li>ML-based bot detection</li>
+            <li>WAF integration</li>
+            <li>AI analysis & optimization layer</li>
+          </ul>
+        </div>
+        <div class="risk-card">
+          <div class="risk-card-header" style="background:#f0fdf4;color:#15803d">
+            ⚖️ Core Principles
+          </div>
+          <ul class="risk-card-body">
+            <li>Never reject events at tracking layer (except auth/schema)</li>
+            <li>Separation: Tracking ≠ Scoring ≠ Rewards</li>
+            <li>No points, no evaluation — record facts only</li>
+            <li>IDs standardized across all systems</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Implementation timeline -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Implementation Plan · 2 Weeks</h3>
+          <p>Mar 21 – Apr 4, 2026</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram-wrap">
+          <div class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#dbeafe", "primaryTextColor": "#1e3a5f", "primaryBorderColor": "#3b82f6", "lineColor": "#94a3b8", "clusterBkg": "#f8fafc", "clusterBorder": "#e2e8f0", "fontSize": "13px"}}}%%
+gantt
+    title Affiliate Tracking MVP — 2 Week Plan
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Week 1 · Foundation
+    Kickoff & event taxonomy   :done, t1, 2026-03-21, 1d
+    Setup Kafka & ClickHouse   :done, t2, 2026-03-22, 2d
+    Build Tracking API         :active, t3, 2026-03-24, 3d
+    Schema validation layer    :t4, 2026-03-25, 2d
+    Setup monitoring           :t5, 2026-03-27, 1d
+
+    section Week 2 · Hardening
+    Deduplication & anomaly detection  :t6, 2026-03-28, 2d
+    Load testing                       :t7, 2026-03-30, 1d
+    Security review                    :t8, 2026-03-31, 1d
+    Demo & Go/No-Go decision           :milestone, t9, 2026-04-04, 0d
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    securityLevel: 'loose',
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    gantt: { useMaxWidth: true }
+  });
+
+  function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+</body>
+</html>
