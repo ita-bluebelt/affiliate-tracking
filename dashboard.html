@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuzzNet – Affiliate Behavior Tracking CMS</title>
+
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { gray: { 950: '#030712' } },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    body { background-color: #f1f5f9; }
+
+    .chart-container { position: relative; height: 280px; }
+
+    .table-scroll::-webkit-scrollbar       { width: 4px; height: 4px; }
+    .table-scroll::-webkit-scrollbar-track { background: #e2e8f0; }
+    .table-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 2px; }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.3; transform: scale(1.5); }
+    }
+    .live-dot { animation: livePulse 2s ease-in-out infinite; }
+
+    .fraud-row { border-left: 2px solid #ef4444; }
+    .clean-row { border-left: 2px solid transparent; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeInUp 0.2s ease forwards; }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 1px 6px; border-radius: 4px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+    }
+    .badge-dup  { background: rgba(245,158,11,0.12); color: #d97706; }
+    .badge-anom { background: rgba(239,68,68,0.10);  color: #dc2626; }
+    .badge-bot  { background: rgba(139,92,246,0.10); color: #7c3aed; }
+    .badge-ip   { background: rgba(6,182,212,0.10);  color: #0891b2; }
+    .badge-ok   { background: rgba(16,185,129,0.10); color: #059669; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-ghost   { background: #ffffff; color: #374151; border: 1px solid #d1d5db; }
+    .btn-ghost:hover { background: #f3f4f6; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    input[type="date"], input[type="text"], select {
+      background: #ffffff; border: 1px solid #d1d5db; color: #111827;
+      border-radius: 8px; font-size: 13px; outline: none;
+      transition: border-color 0.15s;
+      font-family: 'Inter', system-ui, sans-serif;
+      height: 34px;
+      box-sizing: border-box;
+      vertical-align: middle;
+    }
+    input[type="date"], input[type="text"] {
+      padding: 0 10px;
+      line-height: 34px;
+    }
+    input[type="date"]:focus, input[type="text"]:focus, select:focus {
+      border-color: #3b82f6;
+    }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 0 30px 0 10px;
+      font-size: 13px !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      cursor: pointer;
+    }
+    select option { background: #ffffff; }
+
+    th { cursor: pointer; user-select: none; }
+    th:hover { color: #111827; }
+
+    .sortable::after { content: ' ⇅'; opacity: 0.4; font-size: 10px; }
+    .sort-asc::after  { content: ' ↑'; opacity: 1; color: #3b82f6; }
+    .sort-desc::after { content: ' ↓'; opacity: 1; color: #3b82f6; }
+
+    .tab-btn { padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; color: #64748b; }
+    .tab-btn.active { background: #1d4ed8; color: #fff; }
+    .tab-btn:not(.active):hover { color: #1e293b; background: #e2e8f0; }
+  </style>
+</head>
+
+<body class="font-sans text-gray-700 min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOP NAVIGATION
+══════════════════════════════════════════════════════════════ -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between gap-4" style="box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+  <!-- Logo -->
+  <div class="flex items-center gap-3 shrink-0">
+    <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm">BN</div>
+    <div>
+      <div class="text-gray-900 font-semibold text-sm leading-none">BuzzNet CMS</div>
+      <div class="text-gray-400 text-xs mt-0.5">Affiliate Behavior Tracking</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+    <button class="tab-btn active" onclick="setActiveTab(this, 'overview')">Overview</button>
+    <button class="tab-btn" onclick="setActiveTab(this, 'events')">Events</button>
+    <button class="tab-btn" onclick="setActiveTab(this, 'fraud')">Fraud</button>
+    <button class="tab-btn" onclick="setActiveTab(this, 'audit')">Audit Log</button>
+  </div>
+
+  <!-- Right side -->
+  <div class="flex items-center gap-4 shrink-0">
+    <!-- Live indicator -->
+    <div class="flex items-center gap-2 text-xs text-gray-500">
+      <span class="relative flex h-2 w-2">
+        <span class="live-dot absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full bg-green-400"></span>
+      </span>
+      <span>Live</span>
+      <span class="text-gray-300">·</span>
+      <span id="last-updated" class="text-gray-400">--</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="applyFilters()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      Refresh
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════════════════════════ -->
+<main class="pt-16 px-6 pb-8 max-w-[1600px] mx-auto">
+
+  <!-- ─── FILTER BAR ─────────────────────────────────────────── -->
+  <div class="mt-5 mb-6 bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap items-end gap-3">
+    <div>
+      <label class="block text-xs text-gray-500 mb-1.5 font-medium">Date Range</label>
+      <div class="flex items-center gap-2">
+        <input type="date" id="filter-date-start" />
+        <span class="text-gray-400 text-xs">to</span>
+        <input type="date" id="filter-date-end" />
+      </div>
+    </div>
+    <div>
+      <label class="block text-xs text-gray-500 mb-1.5 font-medium">User ID</label>
+      <input type="text" id="filter-user" placeholder="e.g. USR_00042" style="width:150px" />
+    </div>
+    <div>
+      <label class="block text-xs text-gray-500 mb-1.5 font-medium">Event Type</label>
+      <select id="filter-event-type" style="width:160px">
+        <option value="">All Types</option>
+        <option>post_created</option>
+        <option>share_executed</option>
+        <option>comment_created</option>
+        <option>follow_executed</option>
+        <option>task_assigned</option>
+        <option>task_completed</option>
+        <option>content_viewed</option>
+        <option>active_day</option>
+        <option>login</option>
+        <option>streak_milestone</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs text-gray-500 mb-1.5 font-medium">Fraud Signal</label>
+      <select id="filter-fraud" style="width:140px">
+        <option value="all">All Events</option>
+        <option value="fraud">Has Fraud Signal</option>
+        <option value="clean">Clean Only</option>
+      </select>
+    </div>
+    <div class="flex gap-2 ml-auto">
+      <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Reset</button>
+      <button class="btn btn-primary btn-sm" onclick="applyFilters()">Apply Filters</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB PANELS ════════════════════════════════════════════ -->
+  <div id="tab-overview">
+
+  <!-- ─── KPI CARDS ──────────────────────────────────────────── -->
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <!-- Total Events -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Total Events</span>
+        <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+      </div>
+      <div class="text-3xl font-bold text-gray-900" id="kpi-total">–</div>
+      <div class="text-xs mt-1.5" id="kpi-total-sub">–</div>
+    </div>
+    <!-- Active Users -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Active Users</span>
+        <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+      </div>
+      <div class="text-3xl font-bold text-gray-900" id="kpi-users">–</div>
+      <div class="text-xs mt-1.5" id="kpi-users-sub">–</div>
+    </div>
+    <!-- Fraud Signals -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Fraud Signals</span>
+        <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+      </div>
+      <div class="text-3xl font-bold text-gray-900" id="kpi-fraud">–</div>
+      <div class="text-xs mt-1.5" id="kpi-fraud-sub">–</div>
+    </div>
+  </div>
+
+  <!-- ─── CHARTS GRID ────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+    <!-- Chart 1: Event Volume Over Time -->
+    <div class="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Event Volume Over Time</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Daily event count vs fraud signals</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-blue-500 inline-block rounded"></span>Events</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-red-500 inline-block rounded" style="border-top:2px dashed #ef4444; height:0"></span>Fraud</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-volume"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Event Type Distribution -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Event Type Distribution</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Breakdown by action type</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-types"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 3: Fraud Signals Trend -->
+    <div class="lg:col-span-3 bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Fraud Signals Trend</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Daily breakdown by signal type</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs flex-wrap justify-end">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-yellow-500"></span>Duplicate</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-red-500"></span>Anomaly</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-purple-500"></span>Bot</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block bg-cyan-500"></span>IP Flag</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chart-fraud"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TABLES GRID ────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+
+    <!-- Table 1: Recent Events (2 cols wide) -->
+    <div class="xl:col-span-2 bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Recent Events</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Latest recorded user actions</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500" id="events-count">– events</span>
+          <button class="btn btn-ghost btn-sm" onclick="exportTableCSV('recent-events-table', 'recent_events')">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-xs" id="recent-events-table">
+          <thead>
+            <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
+              <th class="text-left px-4 py-3 font-medium">Timestamp</th>
+              <th class="text-left px-4 py-3 font-medium">User</th>
+              <th class="text-left px-4 py-3 font-medium">Event Type</th>
+              <th class="text-left px-4 py-3 font-medium">Platform</th>
+              <th class="text-left px-4 py-3 font-medium">Signals</th>
+            </tr>
+          </thead>
+          <tbody id="events-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-200 text-xs text-gray-500">
+        <span id="events-page-info">Page 1 of –</span>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost btn-sm" id="events-prev" onclick="changePage(-1)">← Prev</button>
+          <button class="btn btn-ghost btn-sm" id="events-next" onclick="changePage(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table 2: Top Users -->
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900">Top Users by Activity</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Ranked by event count</p>
+      </div>
+      <div class="overflow-y-auto table-scroll" style="max-height:400px">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
+              <th class="text-left px-4 py-3 font-medium">#</th>
+              <th class="text-left px-4 py-3 font-medium">User ID</th>
+              <th class="text-right px-4 py-3 font-medium">Events</th>
+              <th class="text-left px-4 py-3 font-medium">Fraud %</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-overview -->
+
+  <!-- ═══ TAB: EVENTS ════════════════════════════════════════════ -->
+  <div id="tab-events" style="display:none">
+
+    <!-- Event Type Stat Cards -->
+    <div id="event-type-stats" class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3 mb-6">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-900">Activity by Hour of Day</h3>
+          <p class="text-xs text-gray-400 mt-0.5">When are users most active? (all 24h)</p>
+        </div>
+        <div class="chart-container"><canvas id="chart-hourly"></canvas></div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-900">Events by Platform</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Web vs iOS vs Android breakdown</p>
+        </div>
+        <div class="chart-container"><canvas id="chart-platform"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Full Event Log Table -->
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Full Event Log</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Complete history with event IDs and integrity hashes</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500" id="events-full-count">– events</span>
+          <button class="btn btn-ghost btn-sm" onclick="exportEventsFullCSV()">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
+              <th class="text-left px-4 py-3 font-medium">Event ID</th>
+              <th class="text-left px-4 py-3 font-medium">Timestamp</th>
+              <th class="text-left px-4 py-3 font-medium">User</th>
+              <th class="text-left px-4 py-3 font-medium">Event Type</th>
+              <th class="text-left px-4 py-3 font-medium">Platform</th>
+              <th class="text-left px-4 py-3 font-medium">IP Address</th>
+              <th class="text-left px-4 py-3 font-medium">Signals</th>
+              <th class="text-left px-4 py-3 font-medium">HMAC</th>
+            </tr>
+          </thead>
+          <tbody id="events-full-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-200 text-xs text-gray-500">
+        <span id="events-full-page-info">Page 1 of –</span>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost btn-sm" id="events-full-prev" onclick="changeFullPage(-1)">← Prev</button>
+          <button class="btn btn-ghost btn-sm" id="events-full-next" onclick="changeFullPage(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-events -->
+
+  <!-- ═══ TAB: FRAUD ════════════════════════════════════════════ -->
+  <div id="tab-fraud" style="display:none">
+
+    <!-- Fraud KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Total Flagged</span>
+          <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-gray-900" id="fraud-kpi-total">–</div>
+        <div class="text-xs mt-1.5 text-red-400" id="fraud-kpi-total-sub">–</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Duplicates</span>
+          <div class="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-gray-900" id="fraud-kpi-dup">–</div>
+        <div class="text-xs mt-1.5 text-yellow-400" id="fraud-kpi-dup-sub">–</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Anomalies</span>
+          <div class="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-gray-900" id="fraud-kpi-anom">–</div>
+        <div class="text-xs mt-1.5 text-red-400" id="fraud-kpi-anom-sub">–</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Bot Suspected</span>
+          <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-gray-900" id="fraud-kpi-bot">–</div>
+        <div class="text-xs mt-1.5 text-purple-400" id="fraud-kpi-bot-sub">–</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">IP Flagged</span>
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-gray-900" id="fraud-kpi-ip">–</div>
+        <div class="text-xs mt-1.5 text-cyan-400" id="fraud-kpi-ip-sub">–</div>
+      </div>
+    </div>
+
+    <!-- Fraud Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-900">Fraud Signal Distribution</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Breakdown by signal type</p>
+        </div>
+        <div class="chart-container"><canvas id="chart-fraud-donut"></canvas></div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900">Fraud Trend by Signal Type</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Daily count per signal</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs flex-wrap justify-end">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-yellow-500 inline-block"></span>DUP</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block"></span>ANOM</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-purple-500 inline-block"></span>BOT</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-cyan-500 inline-block"></span>IP</span>
+          </div>
+        </div>
+        <div class="chart-container"><canvas id="chart-fraud-timeline"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Top Flagged Users -->
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-6">
+      <div class="px-5 py-4 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900">Top Flagged Users</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Users with most fraud signals across all types</p>
+      </div>
+      <div class="overflow-y-auto table-scroll" style="max-height:360px">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
+              <th class="text-left px-4 py-3 font-medium">#</th>
+              <th class="text-left px-4 py-3 font-medium">User ID</th>
+              <th class="text-right px-4 py-3 font-medium">Flags</th>
+              <th class="text-right px-4 py-3 font-medium text-yellow-500">DUP</th>
+              <th class="text-right px-4 py-3 font-medium text-red-500">ANOM</th>
+              <th class="text-right px-4 py-3 font-medium text-purple-500">BOT</th>
+              <th class="text-right px-4 py-3 font-medium text-cyan-500">IP</th>
+              <th class="text-left px-4 py-3 font-medium">Rate</th>
+            </tr>
+          </thead>
+          <tbody id="fraud-users-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Fraud Events Feed -->
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Fraud Events Feed</h3>
+          <p class="text-xs text-gray-400 mt-0.5">All events with at least one fraud signal</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="fraud-signal-filter" onchange="fraudEventsPage=1;renderFraudEvents()" style="width:150px">
+            <option value="all">All Signals</option>
+            <option value="is_duplicate">Duplicate Only</option>
+            <option value="anomaly_detected">Anomaly Only</option>
+            <option value="bot_suspected">Bot Only</option>
+            <option value="ip_flagged">IP Flagged Only</option>
+          </select>
+          <span class="text-xs text-gray-500" id="fraud-events-count">–</span>
+          <button class="btn btn-ghost btn-sm" onclick="exportFraudCSV()">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
+              <th class="text-left px-4 py-3 font-medium">Timestamp</th>
+              <th class="text-left px-4 py-3 font-medium">User</th>
+              <th class="text-left px-4 py-3 font-medium">Event Type</th>
+              <th class="text-left px-4 py-3 font-medium">IP Address</th>
+              <th class="text-center px-3 py-3 font-medium text-yellow-500">DUP</th>
+              <th class="text-center px-3 py-3 font-medium text-red-500">ANOM</th>
+              <th class="text-center px-3 py-3 font-medium text-purple-500">BOT</th>
+              <th class="text-center px-3 py-3 font-medium text-cyan-500">IP</th>
+            </tr>
+          </thead>
+          <tbody id="fraud-events-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-200 text-xs text-gray-500">
+        <span id="fraud-events-page-info">Page 1 of –</span>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost btn-sm" id="fraud-events-prev" onclick="changeFraudPage(-1)">← Prev</button>
+          <button class="btn btn-ghost btn-sm" id="fraud-events-next" onclick="changeFraudPage(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tab-fraud -->
+
+  <!-- ═══ TAB: AUDIT LOG ═════════════════════════════════════════ -->
+  <div id="tab-audit" style="display:none">
+
+  <!-- ─── AUDIT LOG ──────────────────────────────────────────── -->
+  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-900">Audit Log Search</h3>
+      <p class="text-xs text-gray-400 mt-0.5">Full tamper-proof event history · append-only · HMAC-SHA256 signed</p>
+    </div>
+    <div class="p-5">
+      <div class="flex flex-wrap items-end gap-3 mb-4">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1.5">Search</label>
+          <input type="text" id="audit-search" placeholder="User ID, event type, IP…" style="width:260px" oninput="searchAudit()" />
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1.5">Event Type</label>
+          <select id="audit-type" onchange="searchAudit()" style="width:160px">
+            <option value="">All Types</option>
+            <option>post_created</option><option>share_executed</option>
+            <option>comment_created</option><option>follow_executed</option>
+            <option>task_assigned</option>
+            <option>task_completed</option><option>content_viewed</option>
+            <option>active_day</option><option>login</option>
+            <option>streak_milestone</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1.5">Fraud Filter</label>
+          <select id="audit-fraud" onchange="searchAudit()" style="width:140px">
+            <option value="all">All Events</option>
+            <option value="fraud">Fraud Only</option>
+            <option value="clean">Clean Only</option>
+          </select>
+        </div>
+        <div class="flex gap-2 ml-auto">
+          <span class="text-xs text-gray-500 self-center" id="audit-count">– results</span>
+          <button class="btn btn-ghost btn-sm" onclick="exportAuditLog()">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto table-scroll">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
+              <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('event_time')">Timestamp</th>
+              <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('user_id')">User ID</th>
+              <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('event_type')">Event Type</th>
+              <th class="text-left px-4 py-3 font-medium">IP Address</th>
+              <th class="text-left px-4 py-3 font-medium">Platform</th>
+              <th class="text-left px-4 py-3 font-medium">Fraud Signals</th>
+              <th class="text-left px-4 py-3 font-medium">Integrity</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
+        <span id="audit-page-info">Page 1 of –</span>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost btn-sm" id="audit-prev" onclick="changeAuditPage(-1)">← Prev</button>
+          <button class="btn btn-ghost btn-sm" id="audit-next" onclick="changeAuditPage(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tab-audit -->
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════════
+// CONSTANTS & MOCK DATA GENERATOR
+// ═══════════════════════════════════════════════
+const EVENT_TYPES = [
+  'post_created','share_executed','comment_created','follow_executed',
+  'campaign_joined','task_assigned','task_completed','content_viewed',
+  'active_day','login','streak_milestone'
+];
+
+const EVENT_COLORS = {
+  post_created:     '#3b82f6',
+  share_executed:   '#8b5cf6',
+  comment_created:  '#06b6d4',
+  follow_executed:  '#10b981',
+  campaign_joined:  '#f59e0b',
+  task_assigned:    '#ef4444',
+  task_completed:   '#22c55e',
+  content_viewed:   '#f97316',
+  active_day:       '#a78bfa',
+  login:            '#6366f1',
+  streak_milestone: '#14b8a6',
+};
+
+const USER_POOL    = Array.from({length: 200}, (_, i) => `USR_${String(i+1).padStart(5,'0')}`);
+const PLATFORMS    = ['web','ios','android'];
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randItem(arr)      { return arr[Math.floor(Math.random() * arr.length)]; }
+function randBool(p = 0.05) { return Math.random() < p; }
+
+function fakeIP() {
+  return `${randInt(1,254)}.${randInt(0,255)}.${randInt(0,255)}.${randInt(0,255)}`;
+}
+
+function fakeHMAC() {
+  return [...Array(16)].map(() => Math.floor(Math.random()*16).toString(16)).join('') +
+         [...Array(16)].map(() => Math.floor(Math.random()*16).toString(16)).join('');
+}
+
+// Seeded generator for reproducibility
+let seed = 42;
+function seededRand() {
+  seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+  return (seed >>> 0) / 0xffffffff;
+}
+
+function generateEvents(count = 4000) {
+  const now = Date.now();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  const events = [];
+  for (let i = 0; i < count; i++) {
+    const ts = new Date(now - Math.random() * thirtyDaysMs);
+    events.push({
+      event_id:         crypto.randomUUID(),
+      user_id:          randItem(USER_POOL),
+      event_type:       randItem(EVENT_TYPES),
+      event_time:       ts.toISOString(),
+      event_date:       ts.toISOString().slice(0, 10),
+      platform:         randItem(PLATFORMS),
+      ip_address:       fakeIP(),
+      hmac_signature:   fakeHMAC(),
+      is_duplicate:     randBool(0.03),
+      anomaly_detected: randBool(0.04),
+      bot_suspected:    randBool(0.02),
+      ip_flagged:       randBool(0.05),
+    });
+  }
+  return events.sort((a, b) => new Date(b.event_time) - new Date(a.event_time));
+}
+
+const RAW_EVENTS = generateEvents(4000);
+
+// ═══════════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ═══════════════════════════════════════════════
+function hasFraud(e) {
+  return e.is_duplicate || e.anomaly_detected || e.bot_suspected || e.ip_flagged;
+}
+
+function fmtNum(n) {
+  return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
+}
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString('en-US', {
+    month: 'short', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+}
+
+function fraudBadges(e) {
+  let out = '';
+  if (e.is_duplicate)     out += `<span class="badge badge-dup">DUP</span> `;
+  if (e.anomaly_detected) out += `<span class="badge badge-anom">ANOM</span> `;
+  if (e.bot_suspected)    out += `<span class="badge badge-bot">BOT</span> `;
+  if (e.ip_flagged)       out += `<span class="badge badge-ip">IP</span> `;
+  if (!out)               out  = `<span class="badge badge-ok">OK</span>`;
+  return out;
+}
+
+function fraudBar(rate) {
+  const pct = Math.min(100, rate * 100).toFixed(1);
+  const color = rate < 0.05 ? '#10b981' : rate < 0.15 ? '#f59e0b' : '#ef4444';
+  return `<div class="flex items-center gap-2">
+    <div style="width:80px;height:4px;background:#1f2937;border-radius:2px;overflow:hidden">
+      <div style="width:${pct}%;height:100%;background:${color};border-radius:2px"></div>
+    </div>
+    <span style="color:${color}">${pct}%</span>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+// AGGREGATION
+// ═══════════════════════════════════════════════
+function groupByDate(events) {
+  const map = {};
+  events.forEach(e => {
+    map[e.event_date] = (map[e.event_date] || 0) + 1;
+  });
+  return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function groupFraudByDate(events) {
+  const map = {};
+  events.forEach(e => {
+    if (!map[e.event_date]) map[e.event_date] = {dup:0, anom:0, bot:0, ip:0};
+    if (e.is_duplicate)     map[e.event_date].dup++;
+    if (e.anomaly_detected) map[e.event_date].anom++;
+    if (e.bot_suspected)    map[e.event_date].bot++;
+    if (e.ip_flagged)       map[e.event_date].ip++;
+  });
+  return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function groupByType(events) {
+  const map = {};
+  events.forEach(e => { map[e.event_type] = (map[e.event_type] || 0) + 1; });
+  return Object.entries(map).sort((a, b) => b[1] - a[1]);
+}
+
+function groupByUser(events, topN = 30) {
+  const map = {};
+  events.forEach(e => {
+    if (!map[e.user_id]) map[e.user_id] = {total:0, fraud:0, last:''};
+    const u = map[e.user_id];
+    u.total++;
+    if (hasFraud(e)) u.fraud++;
+    if (!u.last || e.event_time > u.last) u.last = e.event_time;
+  });
+  return Object.entries(map)
+    .map(([id, v]) => ({ id, ...v }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, topN);
+}
+
+// ═══════════════════════════════════════════════
+// FILTER STATE
+// ═══════════════════════════════════════════════
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let filteredEvents = [];
+
+function readFilters() {
+  return {
+    dateStart:   document.getElementById('filter-date-start').value,
+    dateEnd:     document.getElementById('filter-date-end').value,
+    userId:      document.getElementById('filter-user').value.trim(),
+    eventType:   document.getElementById('filter-event-type').value,
+    fraudFlag:   document.getElementById('filter-fraud').value,
+  };
+}
+
+function applyFilters() {
+  const f = readFilters();
+  filteredEvents = RAW_EVENTS
+    .filter(e => (!f.dateStart || e.event_date >= f.dateStart))
+    .filter(e => (!f.dateEnd   || e.event_date <= f.dateEnd))
+    .filter(e => (!f.userId    || e.user_id.toLowerCase().includes(f.userId.toLowerCase())))
+    .filter(e => (!f.eventType  || e.event_type === f.eventType))
+    .filter(e => f.fraudFlag === 'all'   ? true
+               : f.fraudFlag === 'fraud' ? hasFraud(e)
+               :                          !hasFraud(e));
+
+  currentPage = 1;
+  renderKPIs(filteredEvents);
+  updateChartVolume(filteredEvents);
+  updateChartTypes(filteredEvents);
+  updateChartFraud(filteredEvents);
+  renderRecentEvents(filteredEvents, 1);
+  renderTopUsers(filteredEvents);
+  updateLastRefreshed();
+
+  // Keep active non-overview tab in sync
+  const activeTab = document.querySelector('.tab-btn.active')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+  if (activeTab === 'events' && chartHourly) updateEventsTab(filteredEvents);
+  else if (activeTab === 'fraud' && chartFraudDonut) updateFraudTab(filteredEvents);
+}
+
+function resetFilters() {
+  const today = new Date().toISOString().slice(0, 10);
+  const ago30 = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
+  document.getElementById('filter-date-start').value = ago30;
+  document.getElementById('filter-date-end').value   = today;
+  document.getElementById('filter-user').value        = '';
+  document.getElementById('filter-campaign').value    = '';
+  document.getElementById('filter-event-type').value  = '';
+  document.getElementById('filter-fraud').value        = 'all';
+  applyFilters();
+}
+
+// ═══════════════════════════════════════════════
+// KPI RENDER
+// ═══════════════════════════════════════════════
+function renderKPIs(events) {
+  const total    = events.length;
+  const users    = new Set(events.map(e => e.user_id)).size;
+  const fraudCnt = events.filter(hasFraud).length;
+  const fraudPct = total ? ((fraudCnt / total) * 100).toFixed(1) : '0.0';
+
+  document.getElementById('kpi-total').textContent     = total.toLocaleString();
+  document.getElementById('kpi-users').textContent     = users.toLocaleString();
+  document.getElementById('kpi-fraud').textContent     = fraudCnt.toLocaleString();
+
+  document.getElementById('kpi-total-sub').innerHTML   = `<span class="text-blue-400">${fmtNum(total)} events recorded</span>`;
+  document.getElementById('kpi-users-sub').innerHTML   = `<span class="text-green-400">${users} unique users active</span>`;
+
+  const fraudColor = parseFloat(fraudPct) < 5 ? 'text-green-400' : parseFloat(fraudPct) < 15 ? 'text-yellow-400' : 'text-red-400';
+  document.getElementById('kpi-fraud-sub').innerHTML   = `<span class="${fraudColor}">${fraudPct}% of total events</span>`;
+}
+
+// ═══════════════════════════════════════════════
+// CHART INSTANCES
+// ═══════════════════════════════════════════════
+let chartVolume, chartTypes, chartFraud;
+
+const gridColor = 'rgba(0,0,0,0.06)';
+const tickColor = '#6b7280';
+const baseOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+};
+
+// Center text plugin for donut (opt-in via plugins.centerText.enabled)
+Chart.register({
+  id: 'centerText',
+  afterDraw(chart) {
+    if (chart.config.type !== 'doughnut') return;
+    const opts = chart.options.plugins?.centerText;
+    if (!opts?.enabled) return;
+    const { ctx, data, chartArea } = chart;
+    if (!chartArea) return;
+    const total = (data.datasets[0]?.data || []).reduce((a, b) => a + b, 0);
+    // Use chartArea center so text aligns with the actual donut hole
+    const cx = (chartArea.left + chartArea.right) / 2;
+    const cy = (chartArea.top + chartArea.bottom) / 2;
+    const areaH = chartArea.bottom - chartArea.top;
+    const fs1 = Math.max(13, Math.round(areaH / 7));
+    const fs2 = Math.max(10, Math.round(areaH / 12));
+    ctx.save();
+    ctx.font = `700 ${fs1}px Inter, sans-serif`;
+    ctx.fillStyle = '#111827';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(total.toLocaleString(), cx, cy - fs2 * 0.5);
+    ctx.font = `400 ${fs2}px Inter, sans-serif`;
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText(opts.label || 'total', cx, cy + fs1 * 0.6);
+    ctx.restore();
+  }
+});
+
+function initCharts() {
+  // Chart 1 – Volume over time
+  chartVolume = new Chart(document.getElementById('chart-volume'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: 'Events', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.07)', fill: true, tension: 0.4, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
+      { label: 'Fraud',  data: [], borderColor: '#ef4444', borderDash: [4,3], fill: false, tension: 0.4, pointRadius: 2, pointHoverRadius: 5, borderWidth: 1.5 },
+    ]},
+    options: { ...baseOptions,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { ...baseOptions.plugins, tooltip: { callbacks: {
+        title: ctx => ctx[0].label,
+      }}},
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, maxTicksLimit: 10, maxRotation: 0 } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor }, beginAtZero: true },
+      }
+    }
+  });
+
+  // Chart 2 – Type distribution
+  chartTypes = new Chart(document.getElementById('chart-types'), {
+    type: 'doughnut',
+    data: { labels: EVENT_TYPES, datasets: [{
+      data: Array(EVENT_TYPES.length).fill(0),
+      backgroundColor: EVENT_TYPES.map(t => EVENT_COLORS[t]),
+      borderWidth: 2, borderColor: '#f1f5f9',
+      hoverOffset: 6,
+    }]},
+    options: { ...baseOptions,
+      cutout: '65%',
+      plugins: {
+        centerText: { enabled: true, label: 'events' },
+        legend: {
+          display: true, position: 'right',
+          labels: { color: '#6b7280', padding: 10, font: { size: 10 }, boxWidth: 10, boxHeight: 10 }
+        },
+        tooltip: { callbacks: {
+          label: ctx => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+            return ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${pct}%)`;
+          }
+        }}
+      }
+    }
+  });
+
+  // Chart 3 – Fraud trend
+  chartFraud = new Chart(document.getElementById('chart-fraud'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: 'Duplicate',      data: [], borderColor: '#f59e0b', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+      { label: 'Anomaly',        data: [], borderColor: '#ef4444', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+      { label: 'Bot Suspected',  data: [], borderColor: '#8b5cf6', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+      { label: 'IP Flagged',     data: [], borderColor: '#06b6d4', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+    ]},
+    options: { ...baseOptions,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: '#6b7280', font: { size: 10 }, boxWidth: 12, boxHeight: 12 } }
+      },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, maxTicksLimit: 10, maxRotation: 0 } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// CHART UPDATERS
+// ═══════════════════════════════════════════════
+function updateChartVolume(events) {
+  const byDate = groupByDate(events);
+  const fraudByDate = new Map(groupFraudByDate(events).map(([d, v]) => [d, v.dup + v.anom + v.bot + v.ip]));
+  chartVolume.data.labels             = byDate.map(([d]) => d);
+  chartVolume.data.datasets[0].data   = byDate.map(([, c]) => c);
+  chartVolume.data.datasets[1].data   = byDate.map(([d]) => fraudByDate.get(d) || 0);
+  chartVolume.update('none');
+}
+
+function updateChartTypes(events) {
+  const byType = new Map(groupByType(events));
+  chartTypes.data.datasets[0].data = EVENT_TYPES.map(t => byType.get(t) || 0);
+  chartTypes.update('none');
+}
+
+function updateChartFraud(events) {
+  const fd = groupFraudByDate(events);
+  chartFraud.data.labels                 = fd.map(([d]) => d);
+  chartFraud.data.datasets[0].data       = fd.map(([, v]) => v.dup);
+  chartFraud.data.datasets[1].data       = fd.map(([, v]) => v.anom);
+  chartFraud.data.datasets[2].data       = fd.map(([, v]) => v.bot);
+  chartFraud.data.datasets[3].data       = fd.map(([, v]) => v.ip);
+  chartFraud.update('none');
+}
+
+// ═══════════════════════════════════════════════
+// TABLE RENDERERS
+// ═══════════════════════════════════════════════
+function renderRecentEvents(events, page) {
+  currentPage = page;
+  const total   = events.length;
+  const pages   = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const start   = (page - 1) * PAGE_SIZE;
+  const slice   = events.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('events-count').textContent    = `${total.toLocaleString()} events`;
+  document.getElementById('events-page-info').textContent = `Page ${page} of ${pages}`;
+  document.getElementById('events-prev').disabled = page <= 1;
+  document.getElementById('events-next').disabled = page >= pages;
+
+  const tbody = document.getElementById('events-tbody');
+  tbody.innerHTML = slice.map(e => `
+    <tr class="${hasFraud(e) ? 'fraud-row' : 'clean-row'} hover:bg-gray-50 transition-colors fade-in">
+      <td class="px-4 py-2.5 text-gray-400 whitespace-nowrap">${fmtTime(e.event_time)}</td>
+      <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${e.user_id}</td>
+      <td class="px-4 py-2.5">
+        <span style="color:${EVENT_COLORS[e.event_type] || '#9ca3af'}">${e.event_type}</span>
+      </td>
+      <td class="px-4 py-2.5 text-gray-500">${e.platform}</td>
+      <td class="px-4 py-2.5">${fraudBadges(e)}</td>
+    </tr>
+  `).join('');
+}
+
+function changePage(delta) {
+  const pages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const next  = Math.min(pages, Math.max(1, currentPage + delta));
+  renderRecentEvents(filteredEvents, next);
+}
+
+function renderTopUsers(events) {
+  const users = groupByUser(events, 30);
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = users.map((u, i) => `
+    <tr class="hover:bg-gray-50 transition-colors">
+      <td class="px-4 py-2.5 text-gray-400 text-[11px]">${i+1}</td>
+      <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${u.id}</td>
+      <td class="px-4 py-2.5 text-right text-gray-900 font-medium">${u.total.toLocaleString()}</td>
+      <td class="px-4 py-2.5">${fraudBar(u.total ? u.fraud / u.total : 0)}</td>
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// AUDIT LOG
+// ═══════════════════════════════════════════════
+let auditResults = [];
+let auditPage = 1;
+const AUDIT_PAGE_SIZE = 25;
+let auditSort = { field: 'event_time', dir: 'desc' };
+
+function searchAudit() {
+  const q    = document.getElementById('audit-search').value.trim().toLowerCase();
+  const type = document.getElementById('audit-type').value;
+  const flag = document.getElementById('audit-fraud').value;
+
+  auditResults = RAW_EVENTS.filter(e => {
+    const matchQ    = !q || e.user_id.toLowerCase().includes(q) || e.event_type.includes(q)
+                        || e.ip_address.includes(q);
+    const matchType = !type || e.event_type === type;
+    const matchFlag = flag === 'all' ? true : flag === 'fraud' ? hasFraud(e) : !hasFraud(e);
+    return matchQ && matchType && matchFlag;
+  });
+
+  sortAuditResults();
+  auditPage = 1;
+  renderAuditTable();
+}
+
+function sortAudit(field) {
+  if (auditSort.field === field) {
+    auditSort.dir = auditSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    auditSort = { field, dir: 'asc' };
+  }
+  // Update header classes
+  document.querySelectorAll('#audit-tbody').forEach(() => {});
+  const ths = document.querySelectorAll('[onclick^="sortAudit"]');
+  ths.forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.getAttribute('onclick') === `sortAudit('${field}')`) {
+      th.classList.add(auditSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+    }
+  });
+  sortAuditResults();
+  renderAuditTable();
+}
+
+function sortAuditResults() {
+  const { field, dir } = auditSort;
+  auditResults.sort((a, b) => {
+    const av = a[field] || '', bv = b[field] || '';
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return dir === 'asc' ? cmp : -cmp;
+  });
+}
+
+function renderAuditTable() {
+  const total = auditResults.length;
+  const pages = Math.max(1, Math.ceil(total / AUDIT_PAGE_SIZE));
+  const start = (auditPage - 1) * AUDIT_PAGE_SIZE;
+  const slice = auditResults.slice(start, start + AUDIT_PAGE_SIZE);
+
+  document.getElementById('audit-count').textContent     = `${total.toLocaleString()} results`;
+  document.getElementById('audit-page-info').textContent = `Page ${auditPage} of ${pages}`;
+  document.getElementById('audit-prev').disabled = auditPage <= 1;
+  document.getElementById('audit-next').disabled = auditPage >= pages;
+
+  const tbody = document.getElementById('audit-tbody');
+  tbody.innerHTML = slice.map(e => `
+    <tr class="${hasFraud(e) ? 'fraud-row' : 'clean-row'} hover:bg-gray-50 transition-colors fade-in">
+      <td class="px-4 py-2.5 text-gray-400 text-[11px] whitespace-nowrap">${fmtTime(e.event_time)}</td>
+      <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${e.user_id}</td>
+      <td class="px-4 py-2.5 text-[11px]" style="color:${EVENT_COLORS[e.event_type] || '#9ca3af'}">${e.event_type}</td>
+      <td class="px-4 py-2.5 font-mono text-gray-500 text-[11px]">${e.ip_address}</td>
+      <td class="px-4 py-2.5 text-gray-500 text-[11px]">${e.platform}</td>
+      <td class="px-4 py-2.5">${fraudBadges(e)}</td>
+      <td class="px-4 py-2.5 font-mono text-gray-400 text-[10px] truncate" style="max-width:120px" title="${e.hmac_signature}">
+        <span class="text-green-600">✓</span> ${e.hmac_signature.slice(0, 12)}…
+      </td>
+    </tr>
+  `).join('');
+}
+
+function changeAuditPage(delta) {
+  const pages = Math.max(1, Math.ceil(auditResults.length / AUDIT_PAGE_SIZE));
+  auditPage = Math.min(pages, Math.max(1, auditPage + delta));
+  renderAuditTable();
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════
+function exportAuditLog() {
+  const headers = ['event_id','user_id','event_type','event_time',
+                   'platform','ip_address','is_duplicate','anomaly_detected',
+                   'bot_suspected','ip_flagged','hmac_signature'];
+  const rows = auditResults.map(e => headers.map(h => JSON.stringify(e[h] ?? '')).join(','));
+  downloadCSV([headers.join(','), ...rows].join('\n'), `audit_log_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function exportTableCSV(tableId, filename) {
+  const rows = [];
+  const table = document.getElementById(tableId);
+  table.querySelectorAll('tr').forEach(tr => {
+    const cells = [...tr.querySelectorAll('th,td')].map(td => JSON.stringify(td.innerText.replace(/\n/g,' ').trim()));
+    if (cells.length) rows.push(cells.join(','));
+  });
+  downloadCSV(rows.join('\n'), `${filename}_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════
+// MISC
+// ═══════════════════════════════════════════════
+function updateLastRefreshed() {
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+
+function setDefaultDateRange() {
+  const today = new Date().toISOString().slice(0, 10);
+  const ago30 = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
+  document.getElementById('filter-date-start').value = ago30;
+  document.getElementById('filter-date-end').value   = today;
+}
+
+function setActiveTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  ['tab-overview','tab-events','tab-fraud','tab-audit'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const panel = document.getElementById('tab-' + tab);
+  if (panel) panel.style.display = '';
+
+  if (tab === 'events') {
+    setTimeout(() => { initEventsTab(); updateEventsTab(filteredEvents); }, 0);
+  } else if (tab === 'fraud') {
+    setTimeout(() => { initFraudTab(); updateFraudTab(filteredEvents); }, 0);
+  } else if (tab === 'audit') {
+    searchAudit();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// EVENTS TAB
+// ═══════════════════════════════════════════════
+let chartHourly = null, chartPlatform = null;
+let eventsFullPage = 1;
+const EVENTS_FULL_PAGE_SIZE = 30;
+let eventsFullData = [];
+
+function initEventsTab() {
+  if (chartHourly) return;
+  chartHourly = new Chart(document.getElementById('chart-hourly'), {
+    type: 'bar',
+    data: {
+      labels: Array.from({length:24}, (_, i) => `${String(i).padStart(2,'0')}:00`),
+      datasets: [{ label: 'Events', data: Array(24).fill(0), backgroundColor: 'rgba(59,130,246,0.65)', borderRadius: 4 }]
+    },
+    options: { ...baseOptions,
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, maxRotation: 0, font: { size: 10 } } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor }, beginAtZero: true }
+      }
+    }
+  });
+  chartPlatform = new Chart(document.getElementById('chart-platform'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Web','iOS','Android'],
+      datasets: [{ data: [0,0,0], backgroundColor: ['#3b82f6','#8b5cf6','#10b981'], borderWidth: 2, borderColor: '#f1f5f9', hoverOffset: 6 }]
+    },
+    options: { ...baseOptions, cutout: '65%',
+      plugins: {
+        centerText: { enabled: true, label: 'events' },
+        legend: { display: true, position: 'right', labels: { color: '#6b7280', padding: 14, font: { size: 12 }, boxWidth: 12, boxHeight: 12 } },
+        tooltip: { callbacks: { label: ctx => {
+          const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+          const pct = total ? ((ctx.parsed/total)*100).toFixed(1) : 0;
+          return ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${pct}%)`;
+        }}}
+      }
+    }
+  });
+}
+
+function updateEventsTab(events) {
+  eventsFullData = events;
+  eventsFullPage = 1;
+
+  // Event type stat cards
+  const byType = new Map(groupByType(events));
+  document.getElementById('event-type-stats').innerHTML = EVENT_TYPES.map(t => {
+    const cnt = byType.get(t) || 0;
+    const pct = events.length ? ((cnt / events.length) * 100).toFixed(1) : '0.0';
+    return `<div class="bg-white border border-gray-200 rounded-xl p-3 text-center hover:border-gray-300 transition-colors">
+      <div class="text-[10px] text-gray-500 mb-1.5 leading-tight">${t.replace(/_/g, ' ')}</div>
+      <div class="text-xl font-bold" style="color:${EVENT_COLORS[t]}">${cnt.toLocaleString()}</div>
+      <div class="text-[10px] text-gray-400 mt-0.5">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Hour activity
+  if (chartHourly) {
+    const hourCounts = Array(24).fill(0);
+    events.forEach(e => { hourCounts[new Date(e.event_time).getHours()]++; });
+    chartHourly.data.datasets[0].data = hourCounts;
+    chartHourly.update('none');
+  }
+
+  // Platform
+  if (chartPlatform) {
+    const p = { web: 0, ios: 0, android: 0 };
+    events.forEach(e => { if (p[e.platform] !== undefined) p[e.platform]++; });
+    chartPlatform.data.datasets[0].data = [p.web, p.ios, p.android];
+    chartPlatform.update('none');
+  }
+
+  renderEventsFullTable();
+}
+
+function renderEventsFullTable() {
+  const total = eventsFullData.length;
+  const pages = Math.max(1, Math.ceil(total / EVENTS_FULL_PAGE_SIZE));
+  const start = (eventsFullPage - 1) * EVENTS_FULL_PAGE_SIZE;
+  const slice = eventsFullData.slice(start, start + EVENTS_FULL_PAGE_SIZE);
+
+  document.getElementById('events-full-count').textContent     = `${total.toLocaleString()} events`;
+  document.getElementById('events-full-page-info').textContent = `Page ${eventsFullPage} of ${pages}`;
+  document.getElementById('events-full-prev').disabled = eventsFullPage <= 1;
+  document.getElementById('events-full-next').disabled = eventsFullPage >= pages;
+
+  document.getElementById('events-full-tbody').innerHTML = slice.map(e => `
+    <tr class="${hasFraud(e)?'fraud-row':'clean-row'} hover:bg-gray-50 transition-colors fade-in">
+      <td class="px-4 py-2.5 font-mono text-gray-400 text-[10px] whitespace-nowrap" title="${e.event_id}">${e.event_id.slice(0,8)}…</td>
+      <td class="px-4 py-2.5 text-gray-400 text-[11px] whitespace-nowrap">${fmtTime(e.event_time)}</td>
+      <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${e.user_id}</td>
+      <td class="px-4 py-2.5 text-[11px]" style="color:${EVENT_COLORS[e.event_type]||'#9ca3af'}">${e.event_type}</td>
+      <td class="px-4 py-2.5 text-gray-500 text-[11px]">${e.platform}</td>
+      <td class="px-4 py-2.5 font-mono text-gray-500 text-[11px]">${e.ip_address}</td>
+      <td class="px-4 py-2.5">${fraudBadges(e)}</td>
+      <td class="px-4 py-2.5 font-mono text-[10px] text-green-600 whitespace-nowrap" title="${e.hmac_signature}">
+        <span class="text-green-500">✓</span> ${e.hmac_signature.slice(0,8)}…
+      </td>
+    </tr>
+  `).join('');
+}
+
+function changeFullPage(delta) {
+  const pages = Math.max(1, Math.ceil(eventsFullData.length / EVENTS_FULL_PAGE_SIZE));
+  eventsFullPage = Math.min(pages, Math.max(1, eventsFullPage + delta));
+  renderEventsFullTable();
+}
+
+function exportEventsFullCSV() {
+  const headers = ['event_id','user_id','event_type','event_time','platform','ip_address','is_duplicate','anomaly_detected','bot_suspected','ip_flagged','hmac_signature'];
+  const rows = eventsFullData.map(e => headers.map(h => JSON.stringify(e[h] ?? '')).join(','));
+  downloadCSV([headers.join(','), ...rows].join('\n'), `events_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+// ═══════════════════════════════════════════════
+// FRAUD TAB
+// ═══════════════════════════════════════════════
+let chartFraudDonut = null, chartFraudTimeline = null;
+let fraudEventsPage = 1;
+const FRAUD_PAGE_SIZE = 30;
+let fraudEventsData = [];
+
+function initFraudTab() {
+  if (chartFraudDonut) return;
+  chartFraudDonut = new Chart(document.getElementById('chart-fraud-donut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Duplicate','Anomaly','Bot Suspected','IP Flagged'],
+      datasets: [{ data: [0,0,0,0],
+        backgroundColor: ['rgba(245,158,11,0.8)','rgba(239,68,68,0.8)','rgba(139,92,246,0.8)','rgba(6,182,212,0.8)'],
+        borderWidth: 2, borderColor: '#f1f5f9', hoverOffset: 6
+      }]
+    },
+    options: { ...baseOptions, cutout: '65%',
+      plugins: {
+        centerText: { enabled: true, label: 'fraud' },
+        legend: { display: true, position: 'right', labels: { color: '#6b7280', padding: 14, font: { size: 12 }, boxWidth: 12, boxHeight: 12 } },
+        tooltip: { callbacks: { label: ctx => {
+          const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+          const pct = total ? ((ctx.parsed/total)*100).toFixed(1) : 0;
+          return ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${pct}%)`;
+        }}}
+      }
+    }
+  });
+  chartFraudTimeline = new Chart(document.getElementById('chart-fraud-timeline'), {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: 'Duplicate',     data: [], borderColor: '#f59e0b', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+      { label: 'Anomaly',       data: [], borderColor: '#ef4444', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+      { label: 'Bot Suspected', data: [], borderColor: '#8b5cf6', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+      { label: 'IP Flagged',    data: [], borderColor: '#06b6d4', fill: false, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+    ]},
+    options: { ...baseOptions,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#6b7280', font: { size: 10 }, boxWidth: 12, boxHeight: 12 } } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, maxTicksLimit: 10, maxRotation: 0 } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function updateFraudTab(events) {
+  const total   = events.length;
+  const dupCnt  = events.filter(e => e.is_duplicate).length;
+  const anomCnt = events.filter(e => e.anomaly_detected).length;
+  const botCnt  = events.filter(e => e.bot_suspected).length;
+  const ipCnt   = events.filter(e => e.ip_flagged).length;
+  const flagged = events.filter(hasFraud).length;
+  const pct = n => total ? ((n/total)*100).toFixed(1)+'%' : '0%';
+
+  document.getElementById('fraud-kpi-total').textContent    = flagged.toLocaleString();
+  document.getElementById('fraud-kpi-dup').textContent      = dupCnt.toLocaleString();
+  document.getElementById('fraud-kpi-anom').textContent     = anomCnt.toLocaleString();
+  document.getElementById('fraud-kpi-bot').textContent      = botCnt.toLocaleString();
+  document.getElementById('fraud-kpi-ip').textContent       = ipCnt.toLocaleString();
+  document.getElementById('fraud-kpi-total-sub').textContent = pct(flagged) + ' of total events';
+  document.getElementById('fraud-kpi-dup-sub').textContent   = pct(dupCnt)  + ' of total';
+  document.getElementById('fraud-kpi-anom-sub').textContent  = pct(anomCnt) + ' of total';
+  document.getElementById('fraud-kpi-bot-sub').textContent   = pct(botCnt)  + ' of total';
+  document.getElementById('fraud-kpi-ip-sub').textContent    = pct(ipCnt)   + ' of total';
+
+  if (chartFraudDonut) {
+    chartFraudDonut.data.datasets[0].data = [dupCnt, anomCnt, botCnt, ipCnt];
+    chartFraudDonut.update('none');
+  }
+  if (chartFraudTimeline) {
+    const fd = groupFraudByDate(events);
+    chartFraudTimeline.data.labels              = fd.map(([d]) => d);
+    chartFraudTimeline.data.datasets[0].data    = fd.map(([,v]) => v.dup);
+    chartFraudTimeline.data.datasets[1].data    = fd.map(([,v]) => v.anom);
+    chartFraudTimeline.data.datasets[2].data    = fd.map(([,v]) => v.bot);
+    chartFraudTimeline.data.datasets[3].data    = fd.map(([,v]) => v.ip);
+    chartFraudTimeline.update('none');
+  }
+
+  // Top flagged users
+  const userMap = {};
+  events.forEach(e => {
+    if (!userMap[e.user_id]) userMap[e.user_id] = { total: 0, dup: 0, anom: 0, bot: 0, ip: 0 };
+    userMap[e.user_id].total++;
+    if (e.is_duplicate)     userMap[e.user_id].dup++;
+    if (e.anomaly_detected) userMap[e.user_id].anom++;
+    if (e.bot_suspected)    userMap[e.user_id].bot++;
+    if (e.ip_flagged)       userMap[e.user_id].ip++;
+  });
+  const topUsers = Object.entries(userMap)
+    .map(([id, v]) => ({ id, ...v, fraudTotal: v.dup + v.anom + v.bot + v.ip }))
+    .filter(u => u.fraudTotal > 0).sort((a,b) => b.fraudTotal - a.fraudTotal).slice(0, 25);
+  document.getElementById('fraud-users-tbody').innerHTML = topUsers.map((u, i) => `
+    <tr class="hover:bg-gray-50 transition-colors">
+      <td class="px-4 py-2.5 text-gray-400 text-[11px]">${i+1}</td>
+      <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${u.id}</td>
+      <td class="px-4 py-2.5 text-right text-red-400 font-semibold">${u.fraudTotal}</td>
+      <td class="px-4 py-2.5 text-right text-yellow-400">${u.dup}</td>
+      <td class="px-4 py-2.5 text-right text-red-400">${u.anom}</td>
+      <td class="px-4 py-2.5 text-right text-purple-400">${u.bot}</td>
+      <td class="px-4 py-2.5 text-right text-cyan-400">${u.ip}</td>
+      <td class="px-4 py-2.5">${fraudBar(u.total ? u.fraudTotal / u.total : 0)}</td>
+    </tr>
+  `).join('');
+
+  fraudEventsData = events.filter(hasFraud);
+  fraudEventsPage = 1;
+  renderFraudEvents();
+}
+
+function renderFraudEvents() {
+  const sig = document.getElementById('fraud-signal-filter')?.value || 'all';
+  const data = sig === 'all' ? fraudEventsData : fraudEventsData.filter(e => e[sig]);
+  const total = data.length;
+  const pages = Math.max(1, Math.ceil(total / FRAUD_PAGE_SIZE));
+  const start = (fraudEventsPage - 1) * FRAUD_PAGE_SIZE;
+  const slice = data.slice(start, start + FRAUD_PAGE_SIZE);
+
+  document.getElementById('fraud-events-count').textContent     = `${total.toLocaleString()} events`;
+  document.getElementById('fraud-events-page-info').textContent = `Page ${fraudEventsPage} of ${pages}`;
+  document.getElementById('fraud-events-prev').disabled = fraudEventsPage <= 1;
+  document.getElementById('fraud-events-next').disabled = fraudEventsPage >= pages;
+
+  const flag = v => v
+    ? `<span class="inline-flex items-center justify-center w-4 h-4 rounded bg-red-500/20 text-red-400 text-[9px] font-bold">✓</span>`
+    : `<span class="text-gray-700">–</span>`;
+
+  document.getElementById('fraud-events-tbody').innerHTML = slice.map(e => `
+    <tr class="fraud-row hover:bg-gray-50 transition-colors fade-in">
+      <td class="px-4 py-2.5 text-gray-400 text-[11px] whitespace-nowrap">${fmtTime(e.event_time)}</td>
+      <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${e.user_id}</td>
+      <td class="px-4 py-2.5 text-[11px]" style="color:${EVENT_COLORS[e.event_type]||'#9ca3af'}">${e.event_type}</td>
+      <td class="px-4 py-2.5 font-mono text-gray-500 text-[11px]">${e.ip_address}</td>
+      <td class="px-3 py-2.5 text-center">${flag(e.is_duplicate)}</td>
+      <td class="px-3 py-2.5 text-center">${flag(e.anomaly_detected)}</td>
+      <td class="px-3 py-2.5 text-center">${flag(e.bot_suspected)}</td>
+      <td class="px-3 py-2.5 text-center">${flag(e.ip_flagged)}</td>
+    </tr>
+  `).join('');
+}
+
+function changeFraudPage(delta) {
+  const sig = document.getElementById('fraud-signal-filter')?.value || 'all';
+  const data = sig === 'all' ? fraudEventsData : fraudEventsData.filter(e => e[sig]);
+  const pages = Math.max(1, Math.ceil(data.length / FRAUD_PAGE_SIZE));
+  fraudEventsPage = Math.min(pages, Math.max(1, fraudEventsPage + delta));
+  renderFraudEvents();
+}
+
+function exportFraudCSV() {
+  const headers = ['event_id','user_id','event_type','event_time','platform','ip_address','is_duplicate','anomaly_detected','bot_suspected','ip_flagged'];
+  const rows = fraudEventsData.map(e => headers.map(h => JSON.stringify(e[h] ?? '')).join(','));
+  downloadCSV([headers.join(','), ...rows].join('\n'), `fraud_events_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setDefaultDateRange();
+  initCharts();
+  applyFilters();
+
+  // Audit log: init with all events
+  auditResults = [...RAW_EVENTS];
+  renderAuditTable();
+
+  // Filter input debounce
+  let debounceTimer;
+  document.getElementById('filter-user').addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(applyFilters, 300);
+  });
+
+  // Auto-refresh every 30s
+  setInterval(applyFilters, 30000);
+});
+</script>
+</body>
+</html>
