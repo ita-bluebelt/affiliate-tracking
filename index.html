@@ -175,6 +175,13 @@
       <input type="text" id="filter-user" placeholder="e.g. USR_00042" style="width:150px" />
     </div>
     <div>
+      <label class="block text-xs text-gray-500 mb-1.5 font-medium">Campaign</label>
+      <select id="filter-campaign" style="width:130px">
+        <option value="">All Campaigns</option>
+        <option value="CAMP_001">CAMP_001</option>
+      </select>
+    </div>
+    <div>
       <label class="block text-xs text-gray-500 mb-1.5 font-medium">Event Type</label>
       <select id="filter-event-type" style="width:160px">
         <option value="">All Types</option>
@@ -638,6 +645,7 @@
             <tr class="bg-gray-50 text-gray-400 uppercase tracking-wide text-[10px]">
               <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('event_time')">Timestamp</th>
               <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('user_id')">User ID</th>
+              <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('campaign_id')">Campaign</th>
               <th class="sortable text-left px-4 py-3 font-medium" onclick="sortAudit('event_type')">Event Type</th>
               <th class="text-left px-4 py-3 font-medium">IP Address</th>
               <th class="text-left px-4 py-3 font-medium">Platform</th>
@@ -724,6 +732,7 @@ function generateEvents(count = 4000) {
       event_type:       randItem(EVENT_TYPES),
       event_time:       ts.toISOString(),
       event_date:       ts.toISOString().slice(0, 10),
+      campaign_id:      'CAMP_001',
       platform:         randItem(PLATFORMS),
       ip_address:       fakeIP(),
       hmac_signature:   fakeHMAC(),
@@ -834,6 +843,7 @@ function readFilters() {
     dateStart:   document.getElementById('filter-date-start').value,
     dateEnd:     document.getElementById('filter-date-end').value,
     userId:      document.getElementById('filter-user').value.trim(),
+    campaign:    document.getElementById('filter-campaign').value,
     eventType:   document.getElementById('filter-event-type').value,
     fraudFlag:   document.getElementById('filter-fraud').value,
   };
@@ -845,6 +855,7 @@ function applyFilters() {
     .filter(e => (!f.dateStart || e.event_date >= f.dateStart))
     .filter(e => (!f.dateEnd   || e.event_date <= f.dateEnd))
     .filter(e => (!f.userId    || e.user_id.toLowerCase().includes(f.userId.toLowerCase())))
+    .filter(e => (!f.campaign   || e.campaign_id === f.campaign))
     .filter(e => (!f.eventType  || e.event_type === f.eventType))
     .filter(e => f.fraudFlag === 'all'   ? true
                : f.fraudFlag === 'fraud' ? hasFraud(e)
@@ -1100,7 +1111,7 @@ function searchAudit() {
 
   auditResults = RAW_EVENTS.filter(e => {
     const matchQ    = !q || e.user_id.toLowerCase().includes(q) || e.event_type.includes(q)
-                        || e.ip_address.includes(q);
+                        || e.ip_address.includes(q) || (e.campaign_id || '').toLowerCase().includes(q);
     const matchType = !type || e.event_type === type;
     const matchFlag = flag === 'all' ? true : flag === 'fraud' ? hasFraud(e) : !hasFraud(e);
     return matchQ && matchType && matchFlag;
@@ -1155,6 +1166,7 @@ function renderAuditTable() {
     <tr class="${hasFraud(e) ? 'fraud-row' : 'clean-row'} hover:bg-gray-50 transition-colors fade-in">
       <td class="px-4 py-2.5 text-gray-400 text-[11px] whitespace-nowrap">${fmtTime(e.event_time)}</td>
       <td class="px-4 py-2.5 font-mono text-blue-600 text-[11px]">${e.user_id}</td>
+      <td class="px-4 py-2.5 font-mono text-teal-600 text-[11px]">${e.campaign_id}</td>
       <td class="px-4 py-2.5 text-[11px]" style="color:${EVENT_COLORS[e.event_type] || '#9ca3af'}">${e.event_type}</td>
       <td class="px-4 py-2.5 font-mono text-gray-500 text-[11px]">${e.ip_address}</td>
       <td class="px-4 py-2.5 text-gray-500 text-[11px]">${e.platform}</td>
@@ -1176,7 +1188,7 @@ function changeAuditPage(delta) {
 // EXPORT CSV
 // ═══════════════════════════════════════════════
 function exportAuditLog() {
-  const headers = ['event_id','user_id','event_type','event_time',
+  const headers = ['event_id','user_id','campaign_id','event_type','event_time',
                    'platform','ip_address','is_duplicate','anomaly_detected',
                    'bot_suspected','ip_flagged','hmac_signature'];
   const rows = auditResults.map(e => headers.map(h => JSON.stringify(e[h] ?? '')).join(','));
