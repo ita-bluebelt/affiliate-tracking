@@ -323,112 +323,198 @@
           <p>End-to-end event ingestion pipeline with fraud detection and audit trail</p>
         </div>
       </div>
-      <div class="card-body">
-        <div class="diagram-wrap">
-          <div class="mermaid">
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "primaryColor": "#dbeafe",
-    "primaryTextColor": "#1e3a5f",
-    "primaryBorderColor": "#3b82f6",
-    "lineColor": "#94a3b8",
-    "secondaryColor": "#f0fdf4",
-    "tertiaryColor": "#fef3c7",
-    "background": "#ffffff",
-    "nodeBorder": "#cbd5e1",
-    "clusterBkg": "#f8fafc",
-    "clusterBorder": "#e2e8f0",
-    "titleColor": "#0f172a",
-    "edgeLabelBackground": "#ffffff",
-    "fontSize": "13px"
-  }
-}}%%
-flowchart TD
-    classDef task        fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f,rx:6
-    classDef taskGreen   fill:#dcfce7,stroke:#16a34a,color:#14532d,rx:6
-    classDef taskPurple  fill:#ede9fe,stroke:#7c3aed,color:#3b0764,rx:6
-    classDef taskAmber   fill:#fef3c7,stroke:#f59e0b,color:#78350f,rx:6
-    classDef taskCyan    fill:#cffafe,stroke:#0891b2,color:#0c4a6e,rx:6
-    classDef taskRed     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d,rx:6
-    classDef gateway     fill:#fef9c3,stroke:#eab308,color:#713f12
-    classDef startEvt    fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef endOk       fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef endErr      fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
-    classDef gwJoin      fill:#f0fdf4,stroke:#16a34a,color:#14532d
+      <div class="card-body" style="padding:0;overflow-x:auto;">
+        <div id="swimlane-wrap" style="min-width:1200px;padding:20px 24px 8px;">
+          <svg id="swimlane-svg" viewBox="0 0 1560 500" xmlns="http://www.w3.org/2000/svg"
+               style="width:100%;height:auto;min-height:360px;display:block;font-family:Inter,system-ui,sans-serif;">
+            <defs>
+              <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/>
+              </marker>
+              <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 Z" fill="#ef4444"/>
+              </marker>
+              <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 Z" fill="#16a34a"/>
+              </marker>
+            </defs>
 
-    START(["▶  User performs action in BuzzNet"]):::startEvt
+            <!-- ── Lane backgrounds ─────────────────────────────── -->
+            <!-- BuzzNet: y 0-95 -->
+            <rect x="0" y="0" width="1560" height="95" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+            <!-- API Tracking: y 95-310 -->
+            <rect x="0" y="95" width="1560" height="215" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+            <!-- Kafka & ClickHouse: y 310-405 -->
+            <rect x="0" y="310" width="1560" height="95" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1"/>
+            <!-- Monitoring: y 405-500 -->
+            <rect x="0" y="405" width="1560" height="95" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
 
-    subgraph API["⚙️  Tracking API  ·  Node.js"]
-      direction TB
-      A1["POST /events  or  /events/batch\n— generateEventId · UUID-v4"]:::task
-      A2["authenticateRequest\nAPI key / OAuth2"]:::task
-      GW1{Authenticated?}:::gateway
-      E401(["✕  Reject 401\nUnauthorized"]):::endErr
-      A3["validateEventSchema\nJSON / Avro — reject 400 if invalid"]:::task
-      GW2{Schema Valid?}:::gateway
-      E400(["✕  Reject 400\nInvalid Schema"]):::endErr
-      A4["enrichEventMetadata\nip · session_id · source · user_agent · schema_version"]:::task
+            <!-- ── Label column ─────────────────────────────────── -->
+            <rect x="0" y="0" width="130" height="500" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+            <line x1="0" y1="95"  x2="130" y2="95"  stroke="#e2e8f0" stroke-width="1"/>
+            <line x1="0" y1="310" x2="130" y2="310" stroke="#e2e8f0" stroke-width="1"/>
+            <line x1="0" y1="405" x2="130" y2="405" stroke="#e2e8f0" stroke-width="1"/>
 
-      subgraph FRAUD["🔍  Fraud Signal Detection  —  flag only, never reject"]
-        direction LR
-        F1["checkDuplicate\nIdempotency key"]:::taskAmber
-        F2["checkAnomalyBehavior\nRapid consecutive events"]:::taskAmber
-        F3["checkBotPattern\nAction patterns"]:::taskAmber
-        F4["checkIpReputation\nBlacklist / suspicious IPs"]:::taskAmber
-      end
+            <!-- Label: BuzzNet -->
+            <text x="65" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#1e40af">🌐 BuzzNet</text>
+            <text x="65" y="56" text-anchor="middle" font-size="10" fill="#3b82f6">Client</text>
 
-      A5["buildFraudSignals\nConsolidated fraud_signals object"]:::taskAmber
-      A6["signEvent\nHMAC-SHA256 — tamper-proof integrity"]:::taskPurple
-    end
+            <!-- Label: API Tracking -->
+            <text x="65" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#15803d">⚙️ API Tracking</text>
+            <text x="65" y="206" text-anchor="middle" font-size="10" fill="#16a34a">Node.js</text>
 
-    subgraph KAFKA["📨  Kafka  ·  Streaming Bus"]
-      direction LR
-      K1["publishEventToKafka\nPartition by user_id"]:::taskGreen
-      K2["consumeEventFromKafka\n7-day retention for replay"]:::taskGreen
-    end
+            <!-- Label: Kafka & ClickHouse -->
+            <text x="65" y="347" text-anchor="middle" font-size="11" font-weight="700" fill="#0e7490">📨 Kafka &amp;</text>
+            <text x="65" y="362" text-anchor="middle" font-size="11" font-weight="700" fill="#0e7490">🗄️ ClickHouse</text>
 
-    subgraph CH["🗄️  ClickHouse  ·  Event Storage"]
-      C1["insertEvent\nAppend-only · No updates · No deletes"]:::taskCyan
-    end
+            <!-- Label: Monitoring -->
+            <text x="65" y="442" text-anchor="middle" font-size="12" font-weight="700" fill="#c2410c">📊 Monitoring</text>
+            <text x="65" y="458" text-anchor="middle" font-size="10" fill="#ea580c">System</text>
 
-    subgraph MON["📊  Monitoring & Audit"]
-      direction TB
-      GW3{"Has Fraud\nSignals?"}:::gateway
-      M1["triggerAlert\nAnomaly / Bot / IP / Duplicate"]:::taskRed
-      EEND(["✅  Event Stored Successfully\nAudit trail preserved"]):::endOk
-    end
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- NODES                                              -->
+            <!-- ══════════════════════════════════════════════════ -->
 
-    %% Main flow
-    START --> A1
-    A1    --> A2
-    A2    --> GW1
-    GW1   -->|"❌ Fail"| E401
-    GW1   -->|"✓ Pass"| A3
-    A3    --> GW2
-    GW2   -->|"❌ Invalid"| E400
-    GW2   -->|"✓ Valid"| A4
+            <!-- START (BZ, cx=205, cy=47) -->
+            <rect x="145" y="28" width="120" height="38" rx="19" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="205" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">▶ User Action</text>
+            <text x="205" y="57" text-anchor="middle" font-size="10" fill="#16a34a">in BuzzNet</text>
 
-    %% Parallel fraud checks
-    A4 --> F1
-    A4 --> F2
-    A4 --> F3
-    A4 --> F4
-    F1 --> A5
-    F2 --> A5
-    F3 --> A5
-    F4 --> A5
+            <!-- E401 (BZ, cx=640, cy=47) -->
+            <rect x="575" y="28" width="130" height="38" rx="19" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="640" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">✕ 401 Unauthorized</text>
 
-    %% Continue
-    A5 --> A6
-    A6 --> K1
-    K1 --> K2
-    K2 --> C1
-    C1 --> GW3
-    GW3 -->|"Yes"| M1
-    GW3 -->|"No" | EEND
-    M1  --> EEND
-          </div>
+            <!-- E400 (BZ, cx=835, cy=47) -->
+            <rect x="770" y="28" width="130" height="38" rx="19" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="835" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">✕ 400 Invalid Schema</text>
+
+            <!-- A1 (API, cx=305, cy=202) POST /events -->
+            <rect x="240" y="180" width="130" height="44" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="305" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">POST /events</text>
+            <text x="305" y="212" text-anchor="middle" font-size="10" fill="#3b82f6">generateEventId</text>
+
+            <!-- A2 (API, cx=465, cy=202) Auth -->
+            <rect x="395" y="180" width="140" height="44" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="465" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">authenticateRequest</text>
+            <text x="465" y="212" text-anchor="middle" font-size="10" fill="#3b82f6">API key / OAuth2</text>
+
+            <!-- GW1 diamond (cx=610, cy=202) -->
+            <polygon points="610,182 635,202 610,222 585,202" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="610" y="199" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Auth</text>
+            <text x="610" y="211" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
+
+            <!-- A3 (API, cx=745, cy=202) Validate -->
+            <rect x="670" y="180" width="150" height="44" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="745" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">validateEventSchema</text>
+            <text x="745" y="212" text-anchor="middle" font-size="10" fill="#3b82f6">JSON / Avro</text>
+
+            <!-- GW2 diamond (cx=875, cy=202) -->
+            <polygon points="875,182 900,202 875,222 850,202" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="875" y="199" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Valid</text>
+            <text x="875" y="211" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
+
+            <!-- A4 (API, cx=995, cy=202) Enrich -->
+            <rect x="920" y="180" width="150" height="44" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="995" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">enrichEventMetadata</text>
+            <text x="995" y="212" text-anchor="middle" font-size="10" fill="#3b82f6">ip · session · source</text>
+
+            <!-- FRAUD group (API, cx=1150, cy=202) -->
+            <rect x="1080" y="175" width="140" height="54" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="1150" y="195" text-anchor="middle" font-size="11" font-weight="600" fill="#78350f">Fraud Detection</text>
+            <text x="1150" y="209" text-anchor="middle" font-size="10" fill="#d97706">4 parallel checks</text>
+            <text x="1150" y="222" text-anchor="middle" font-size="9" fill="#b45309">dup · anomaly · bot · IP</text>
+
+            <!-- A6 (API, cx=1330, cy=202) Sign -->
+            <rect x="1255" y="180" width="150" height="44" rx="5" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+            <text x="1330" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#3b0764">signEvent</text>
+            <text x="1330" y="212" text-anchor="middle" font-size="10" fill="#7c3aed">HMAC-SHA256</text>
+
+            <!-- K1 (KCH, cx=1150, cy=357) Kafka -->
+            <rect x="1080" y="335" width="140" height="44" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="1150" y="353" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">publishToKafka</text>
+            <text x="1150" y="367" text-anchor="middle" font-size="10" fill="#16a34a">consume · 7d retention</text>
+
+            <!-- C1 (KCH, cx=1330, cy=357) ClickHouse -->
+            <rect x="1255" y="335" width="150" height="44" rx="5" fill="#cffafe" stroke="#0891b2" stroke-width="1.5"/>
+            <text x="1330" y="353" text-anchor="middle" font-size="11" font-weight="600" fill="#0c4a6e">insertEvent</text>
+            <text x="1330" y="367" text-anchor="middle" font-size="10" fill="#0891b2">ClickHouse · append-only</text>
+
+            <!-- GW3 diamond (MON, cx=1365, cy=452) -->
+            <polygon points="1365,432 1390,452 1365,472 1340,452" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="1365" y="449" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Fraud</text>
+            <text x="1365" y="461" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
+
+            <!-- M1 (MON, cx=1480, cy=428) Alert -->
+            <rect x="1410" y="413" width="135" height="36" rx="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="1477" y="428" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">triggerAlert</text>
+            <text x="1477" y="441" text-anchor="middle" font-size="10" fill="#ef4444">Anomaly / Bot / IP</text>
+
+            <!-- EEND (MON, cx=1480, cy=468) Success -->
+            <rect x="1410" y="453" width="135" height="36" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="1477" y="468" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">✅ Event Stored</text>
+            <text x="1477" y="481" text-anchor="middle" font-size="10" fill="#16a34a">Audit trail preserved</text>
+
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- EDGES                                              -->
+            <!-- ══════════════════════════════════════════════════ -->
+
+            <!-- START → A1 (BZ→API, down): right then down -->
+            <path d="M 265 47 L 305 47 L 305 180" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+            <!-- A1 → A2 -->
+            <line x1="370" y1="202" x2="395" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- A2 → GW1 -->
+            <line x1="535" y1="202" x2="585" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- GW1 →(✗) E401: up into BZ lane -->
+            <path d="M 610 182 L 610 66 L 640 66" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+            <rect x="575" y="115" width="30" height="14" rx="2" fill="#fff"/>
+            <text x="590" y="125" text-anchor="middle" font-size="9" fill="#ef4444">✗ Fail</text>
+
+            <!-- GW1 →(✓) A3 -->
+            <line x1="635" y1="202" x2="670" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="652" y="196" text-anchor="middle" font-size="9" fill="#16a34a">✓</text>
+
+            <!-- A3 → GW2 -->
+            <line x1="820" y1="202" x2="850" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- GW2 →(✗) E400: up into BZ lane -->
+            <path d="M 875 182 L 875 66 L 835 66" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+            <rect x="840" y="115" width="30" height="14" rx="2" fill="#fff"/>
+            <text x="856" y="125" text-anchor="middle" font-size="9" fill="#ef4444">✗</text>
+
+            <!-- GW2 →(✓) A4 -->
+            <line x1="900" y1="202" x2="920" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <text x="910" y="196" text-anchor="middle" font-size="9" fill="#16a34a">✓</text>
+
+            <!-- A4 → FRAUD -->
+            <line x1="1070" y1="202" x2="1080" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- FRAUD → A6 -->
+            <line x1="1220" y1="202" x2="1255" y2="202" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- A6 → K1 (API→KCH, down): down then left then down -->
+            <path d="M 1330 224 L 1330 278 L 1150 278 L 1150 335" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+            <!-- K1 → C1 -->
+            <line x1="1220" y1="357" x2="1255" y2="357" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- C1 → GW3 (KCH→MON, down): down to GW3 top -->
+            <path d="M 1330 379 L 1330 432 L 1340 432" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+            <!-- GW3 →(Yes) M1 -->
+            <path d="M 1390 452 L 1410 452 L 1410 431" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#arr-red)"/>
+            <text x="1398" y="447" text-anchor="middle" font-size="9" fill="#ef4444">Yes</text>
+
+            <!-- GW3 →(No) EEND -->
+            <path d="M 1365 472 L 1365 478 L 1410 478 L 1410 471" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
+            <text x="1387" y="487" text-anchor="middle" font-size="9" fill="#16a34a">No</text>
+
+            <!-- M1 → EEND (alert also ends stored) -->
+            <line x1="1477" y1="449" x2="1477" y2="453" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+          </svg>
         </div>
       </div>
       <div class="legend">
