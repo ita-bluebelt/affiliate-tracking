@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.notion.so)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(claude mcp:*)",
+      "Bash(cat ~/.claude/mcp*.json)",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "Bash(git config:*)",
+      "Bash(gh auth:*)",
+      "Bash(brew install:*)",
+      "Bash(gh repo:*)"
+    ]
+  }
+}
