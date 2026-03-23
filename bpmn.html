@@ -325,8 +325,8 @@
       </div>
       <div class="card-body" style="padding:0;overflow-x:auto;">
         <div id="swimlane-wrap" style="min-width:1600px;padding:20px 24px 8px;">
-          <svg id="swimlane-svg" viewBox="0 0 1820 560" xmlns="http://www.w3.org/2000/svg"
-               style="width:100%;height:auto;min-height:380px;display:block;font-family:Inter,system-ui,sans-serif;">
+          <svg id="swimlane-svg" viewBox="0 0 1820 630" xmlns="http://www.w3.org/2000/svg"
+               style="width:100%;height:auto;min-height:420px;display:block;font-family:Inter,system-ui,sans-serif;">
             <defs>
               <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                 <path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8"/>
@@ -346,11 +346,11 @@
             <rect x="0" y="120" width="1820" height="240" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
             <!-- Kafka & ClickHouse: y 360-460 -->
             <rect x="0" y="360" width="1820" height="100" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1"/>
-            <!-- Monitoring: y 460-560 -->
-            <rect x="0" y="460" width="1820" height="100" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+            <!-- Monitoring: y 460-630 -->
+            <rect x="0" y="460" width="1820" height="170" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
 
             <!-- ── Label column ─────────────────────────────────── -->
-            <rect x="0" y="0" width="130" height="560" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+            <rect x="0" y="0" width="130" height="630" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
             <line x1="0" y1="120" x2="130" y2="120" stroke="#e2e8f0" stroke-width="1"/>
             <line x1="0" y1="360" x2="130" y2="360" stroke="#e2e8f0" stroke-width="1"/>
             <line x1="0" y1="460" x2="130" y2="460" stroke="#e2e8f0" stroke-width="1"/>
@@ -368,8 +368,8 @@
             <text x="65" y="416" text-anchor="middle" font-size="11" font-weight="700" fill="#0e7490">🗄️ ClickHouse</text>
 
             <!-- Label: Monitoring -->
-            <text x="65" y="498" text-anchor="middle" font-size="12" font-weight="700" fill="#c2410c">📊 Monitoring</text>
-            <text x="65" y="514" text-anchor="middle" font-size="10" fill="#ea580c">System</text>
+            <text x="65" y="536" text-anchor="middle" font-size="12" font-weight="700" fill="#c2410c">📊 Monitoring</text>
+            <text x="65" y="552" text-anchor="middle" font-size="10" fill="#ea580c">System</text>
 
             <!-- ══════════════════════════════════════════════════ -->
             <!-- NODES                                              -->
@@ -448,20 +448,20 @@
             <text x="1650" y="406" text-anchor="middle" font-size="11" font-weight="600" fill="#0c4a6e">insertEvent</text>
             <text x="1650" y="420" text-anchor="middle" font-size="10" fill="#0891b2">ClickHouse · append-only</text>
 
-            <!-- GW3 diamond (MON, cx=1500, cy=510) -->
-            <polygon points="1500,488 1525,510 1500,532 1475,510" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
-            <text x="1500" y="507" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Fraud</text>
-            <text x="1500" y="519" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
+            <!-- GW3 diamond (MON, cx=1500, cy=530) -->
+            <polygon points="1500,506 1526,530 1500,554 1474,530" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+            <text x="1500" y="527" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Fraud</text>
+            <text x="1500" y="539" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">?</text>
 
-            <!-- M1 (MON, cx=1640, cy=478) Alert — Yes / upper path -->
-            <rect x="1575" y="460" width="130" height="36" rx="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
-            <text x="1640" y="475" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">triggerAlert</text>
-            <text x="1640" y="488" text-anchor="middle" font-size="10" fill="#ef4444">Anomaly / Bot / IP</text>
+            <!-- M1 (MON, cx=1650, cy=492) Alert — Yes / upper path -->
+            <rect x="1580" y="472" width="140" height="40" rx="5" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="1650" y="489" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">triggerAlert</text>
+            <text x="1650" y="503" text-anchor="middle" font-size="10" fill="#ef4444">Anomaly / Bot / IP</text>
 
-            <!-- EEND (MON, cx=1750, cy=530) Success — merge point -->
-            <rect x="1690" y="512" width="120" height="36" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
-            <text x="1750" y="527" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">✅ Event Stored</text>
-            <text x="1750" y="540" text-anchor="middle" font-size="10" fill="#16a34a">Audit trail preserved</text>
+            <!-- EEND (MON, cx=1750, cy=580) Success — merge point -->
+            <rect x="1685" y="561" width="130" height="40" rx="20" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="1750" y="578" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">✅ Event Stored</text>
+            <text x="1750" y="592" text-anchor="middle" font-size="10" fill="#16a34a">Audit trail preserved</text>
 
             <!-- ══════════════════════════════════════════════════ -->
             <!-- EDGES                                              -->
@@ -512,19 +512,19 @@
             <!-- K1 → C1 -->
             <line x1="1545" y1="410" x2="1572" y2="410" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
 
-            <!-- C1 → GW3 (KCH→MON, cross-lane): down to lane boundary, left to GW3 x, down to GW3 top -->
-            <path d="M 1650 432 L 1650 460 L 1500 460 L 1500 488" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+            <!-- C1 → GW3 (KCH→MON, cross-lane) -->
+            <path d="M 1650 432 L 1650 460 L 1500 460 L 1500 506" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
 
-            <!-- GW3 →(Yes) M1: right then up (upper path) -->
-            <path d="M 1525 510 L 1550 510 L 1550 478 L 1575 478" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#arr-red)"/>
-            <text x="1537" y="504" text-anchor="middle" font-size="9" fill="#ef4444">Yes</text>
+            <!-- GW3 →(Yes) M1: right then up to upper path -->
+            <path d="M 1526 530 L 1553 530 L 1553 492 L 1580 492" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#arr-red)"/>
+            <text x="1538" y="524" text-anchor="middle" font-size="9" font-weight="600" fill="#ef4444">Yes</text>
 
-            <!-- GW3 →(No) EEND: down, right along bottom of lane, up to EEND bottom (lower path) -->
-            <path d="M 1500 532 L 1500 550 L 1750 550 L 1750 548" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
-            <text x="1625" y="556" text-anchor="middle" font-size="9" fill="#16a34a">No</text>
+            <!-- M1 → EEND: right then down (M1 right → right-align with EEND → down to EEND top) -->
+            <path d="M 1720 492 L 1750 492 L 1750 561" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
 
-            <!-- M1 → EEND: right then down to EEND top -->
-            <path d="M 1705 478 L 1750 478 L 1750 512" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+            <!-- GW3 →(No) EEND: down along left margin then right to EEND bottom (lower path, no overlap) -->
+            <path d="M 1500 554 L 1500 610 L 1750 610 L 1750 601" stroke="#16a34a" stroke-width="1.5" fill="none" marker-end="url(#arr-green)"/>
+            <text x="1625" y="620" text-anchor="middle" font-size="9" font-weight="600" fill="#16a34a">No (no fraud)</text>
 
           </svg>
         </div>
