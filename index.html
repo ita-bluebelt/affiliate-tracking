@@ -215,7 +215,7 @@
   <div id="tab-overview">
 
   <!-- ─── KPI CARDS ──────────────────────────────────────────── -->
-  <div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <!-- Total Events -->
     <div class="bg-white border border-gray-200 rounded-xl p-5">
       <div class="flex items-center justify-between mb-3">
@@ -248,6 +248,53 @@
       </div>
       <div class="text-3xl font-bold text-gray-900" id="kpi-fraud">–</div>
       <div class="text-xs mt-1.5" id="kpi-fraud-sub">–</div>
+    </div>
+    <!-- Campaign -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-gray-500 text-xs font-medium uppercase tracking-wide">Campaign Joins</span>
+        <div class="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+        </div>
+      </div>
+      <div class="text-3xl font-bold text-gray-900" id="kpi-campaign">–</div>
+      <div class="text-xs mt-1.5" id="kpi-campaign-sub">–</div>
+    </div>
+  </div>
+
+  <!-- ─── CAMPAIGN SUMMARY ──────────────────────────────────── -->
+  <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-semibold text-gray-900">Campaign Overview</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Active campaign performance metrics</p>
+      </div>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+        <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse inline-block"></span>
+        CAMP_001 · Active
+      </span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="text-xs text-gray-500 mb-1">Total Events</div>
+        <div class="text-xl font-bold text-gray-900" id="camp-total">–</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">all event types</div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="text-xs text-gray-500 mb-1">Participants</div>
+        <div class="text-xl font-bold text-gray-900" id="camp-users">–</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">unique users</div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="text-xs text-gray-500 mb-1">Campaign Joins</div>
+        <div class="text-xl font-bold text-teal-600" id="camp-joins">–</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">campaign_joined events</div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <div class="text-xs text-gray-500 mb-1">Clean Events</div>
+        <div class="text-xl font-bold text-green-600" id="camp-clean">–</div>
+        <div class="text-[11px] text-gray-400 mt-0.5" id="camp-clean-sub">–</div>
+      </div>
     </div>
   </div>
 
@@ -906,6 +953,21 @@ function renderKPIs(events) {
 
   const fraudColor = parseFloat(fraudPct) < 5 ? 'text-green-400' : parseFloat(fraudPct) < 15 ? 'text-yellow-400' : 'text-red-400';
   document.getElementById('kpi-fraud-sub').innerHTML   = `<span class="${fraudColor}">${fraudPct}% of total events</span>`;
+
+  // Campaign KPI
+  const campJoins     = events.filter(e => e.event_type === 'campaign_joined').length;
+  const campUsers     = new Set(events.filter(e => e.campaign_id === 'CAMP_001').map(e => e.user_id)).size;
+  const campClean     = events.filter(e => e.campaign_id === 'CAMP_001' && !hasFraud(e)).length;
+  const campCleanPct  = total ? ((campClean / total) * 100).toFixed(1) : '0.0';
+  const campJoinUsers = new Set(events.filter(e => e.event_type === 'campaign_joined').map(e => e.user_id)).size;
+
+  document.getElementById('kpi-campaign').textContent    = campJoins.toLocaleString();
+  document.getElementById('kpi-campaign-sub').innerHTML  = `<span class="text-teal-500">${campJoinUsers} unique joiners</span>`;
+  document.getElementById('camp-total').textContent      = total.toLocaleString();
+  document.getElementById('camp-users').textContent      = campUsers.toLocaleString();
+  document.getElementById('camp-joins').textContent      = campJoins.toLocaleString();
+  document.getElementById('camp-clean').textContent      = campClean.toLocaleString();
+  document.getElementById('camp-clean-sub').textContent  = `${campCleanPct}% fraud-free`;
 }
 
 // ═══════════════════════════════════════════════
