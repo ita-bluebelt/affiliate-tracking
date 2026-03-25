@@ -647,7 +647,7 @@
   <div id="section-functions" class="section">
     <div class="section-header">
       <h2>Function List</h2>
-      <p>45 functions across 7 system layers</p>
+      <p>46 functions across 7 system layers</p>
     </div>
 
     <div class="card">
@@ -664,9 +664,10 @@
           <tbody>
             <tr>
               <td><span class="layer-badge" style="background:#eff6ff;color:#1e40af">BuzzNet API Service</span></td>
-              <td><span class="func-count">3</span></td>
+              <td><span class="func-count">4</span></td>
               <td>
                 <ul class="func-list">
+                  <li>resolveCampaign(event) — fixed campaign binding</li>
                   <li>signEventPayload(event) — HMAC-SHA256</li>
                   <li>buildAuthHeader(apiKey) — S2S / mutual TLS</li>
                   <li>enrichEventMetadata(event, req) — ip · session · source</li>
@@ -733,14 +734,15 @@
             </tr>
             <tr>
               <td><span class="layer-badge" style="background:#ede9fe;color:#7c3aed">Business Events</span></td>
-              <td><span class="func-count">11</span></td>
+              <td><span class="func-count">12</span></td>
               <td>
                 <ul class="func-list">
-                  <li>recordPostCreated · recordShareExecuted</li>
-                  <li>recordCommentCreated · recordFollowExecuted</li>
+                  <li>recordLikeExecuted · recordShareExecuted · recordRepostExecuted</li>
+                  <li>recordCommentExecuted · recordFollowExecuted · recordSaveExecuted</li>
+                  <li>recordTaskSkipped · recordRegistrationExecuted</li>
+                  <li>recordSnsAccountConnected</li>
                   <li>recordTaskAssigned · recordTaskCompleted</li>
-                  <li>recordContentViewed · recordActiveDay</li>
-                  <li>recordLogin · recordStreakMilestone</li>
+                  <li>recordTaskCompletedStreakMilestone</li>
                 </ul>
               </td>
               <td style="font-size:12px;color:#475569">Domain-specific event handlers</td>
@@ -773,7 +775,7 @@
             </tr>
             <tr style="background:#f8fafc;font-weight:600">
               <td>Total</td>
-              <td><span class="func-count" style="color:#2563eb">45</span></td>
+              <td><span class="func-count" style="color:#2563eb">46</span></td>
               <td colspan="2" style="font-size:12px;color:#475569">Across 7 layers — MVP scope</td>
             </tr>
           </tbody>
