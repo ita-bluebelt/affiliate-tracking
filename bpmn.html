@@ -305,6 +305,7 @@
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="showSection('process')">Process Flow (BPMN)</div>
   <div class="nav-tab" onclick="showSection('events')">Event Taxonomy</div>
+  <div class="nav-tab" onclick="showSection('fraud')">Fraud Detection</div>
   <div class="nav-tab" onclick="showSection('functions')">Function List</div>
   <div class="nav-tab" onclick="showSection('risks')">Risk & Mitigation</div>
 </div>
@@ -639,6 +640,306 @@
   },
   <span style="color:#16a34a">"hmac_signature"</span>: <span style="color:#7c3aed">"sha256:abc123..."</span>   <span style="color:#94a3b8">// Tamper-proof</span>
 }</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: Fraud Detection ────────────────────────────── -->
+  <div id="section-fraud" class="section">
+    <div class="section-header">
+      <h2>Fraud Detection</h2>
+      <p>3 parallel checks — detect and flag only, never reject or drop events</p>
+    </div>
+
+    <!-- Key Principle -->
+    <div class="card">
+      <div class="card-body" style="padding:16px 20px">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="width:36px;height:36px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">⚑</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:4px">Core Principle</div>
+            <div style="font-size:13px;color:#475569;line-height:1.6">
+              Fraud Detection <strong>never rejects events</strong> (except auth/schema failures). It only <strong>attaches flags</strong> to the event before writing to ClickHouse. The backend layer decides how to handle flagged events.
+            </div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
+              <code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:11px;color:#1e293b">is_duplicate</code>
+              <code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:11px;color:#1e293b">anomaly_detected</code>
+              <code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:11px;color:#1e293b">anomaly_reason</code>
+              <code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:11px;color:#1e293b">severity</code>
+              <code style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:11px;color:#1e293b">bot_suspected</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Fraud Types -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;margin-bottom:24px">
+
+      <!-- 1. Duplicate -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header" style="background:#eff6ff;border-bottom-color:#bfdbfe">
+          <div>
+            <h3 style="color:#1d4ed8">1 · Duplicate Event</h3>
+            <p><code style="font-size:11px">checkDuplicate(event)</code></p>
+          </div>
+          <span style="font-size:22px">🔁</span>
+        </div>
+        <div class="card-body" style="padding:16px 20px">
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What is this fraud?</div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:14px">Sending the same event multiple times to inflate metrics. Example: submitting <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px">task_completed</code> 10 times for the same task.</p>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">How to detect</div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;font-size:12px;font-family:'Courier New',monospace;color:#0f172a;line-height:1.7;margin-bottom:14px">
+            Idempotency Key =<br>
+            &nbsp;&nbsp;hash(user_id + event_type<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ content_id + timestamp_rounded)
+          </div>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Implementation</div>
+          <ul style="margin:0;padding:0;list-style:none">
+            <li style="font-size:12px;color:#475569;padding:3px 0;padding-left:14px;position:relative">
+              <span style="position:absolute;left:0;color:#94a3b8;font-size:10px">→</span>
+              Redis <code style="font-size:11px;background:#f1f5f9;padding:1px 4px;border-radius:3px">SET key EX 86400 NX</code> (expire 24h)
+            </li>
+            <li style="font-size:12px;color:#475569;padding:3px 0;padding-left:14px;position:relative">
+              <span style="position:absolute;left:0;color:#94a3b8;font-size:10px">→</span>
+              Round timestamp to the minute to catch duplicates within short windows
+            </li>
+          </ul>
+
+          <div style="margin-top:14px;padding:10px 12px;background:#eff6ff;border-radius:6px">
+            <div style="font-size:11px;font-weight:600;color:#1d4ed8;margin-bottom:6px">Output flags</div>
+            <div style="font-size:11px;font-family:'Courier New',monospace;color:#1e293b;line-height:1.8">
+              <span style="color:#b45309">"is_duplicate"</span>: <span style="color:#16a34a">true</span>,<br>
+              <span style="color:#b45309">"duplicate_of"</span>: <span style="color:#7c3aed">"original_event_uuid"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Anomaly Behavior -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header" style="background:#fef3c7;border-bottom-color:#fde68a">
+          <div>
+            <h3 style="color:#b45309">2 · Anomaly Behavior</h3>
+            <p><code style="font-size:11px">checkAnomalyBehavior(userId, eventType)</code></p>
+          </div>
+          <span style="font-size:22px">⚡</span>
+        </div>
+        <div class="card-body" style="padding:16px 20px">
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What is this fraud?</div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:14px">Actions performed at an abnormal frequency. Example: sharing 100 posts within 60 seconds.</p>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">How to detect — Sliding window</div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;font-size:12px;font-family:'Courier New',monospace;color:#0f172a;line-height:1.7;margin-bottom:14px">
+            Count events of same type per user in 60s<br>
+            If count exceeds threshold → anomaly
+          </div>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Suggested thresholds</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px">
+            <thead>
+              <tr style="background:#f8fafc">
+                <th style="text-align:left;padding:6px 8px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0">Event Type</th>
+                <th style="text-align:center;padding:6px 8px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0">Max / 60s</th>
+                <th style="text-align:center;padding:6px 8px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0">Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace">task_completed</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9">3</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9"><span style="background:#dcfce7;color:#16a34a;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">low</span></td></tr>
+              <tr><td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace">post_created</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9">5</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9"><span style="background:#dcfce7;color:#16a34a;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">low</span></td></tr>
+              <tr><td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace">share_executed</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9">10</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9"><span style="background:#fef3c7;color:#b45309;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">medium</span></td></tr>
+              <tr><td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace">comment_created</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9">20</td><td style="text-align:center;padding:5px 8px;border-bottom:1px solid #f1f5f9"><span style="background:#fef3c7;color:#b45309;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">medium</span></td></tr>
+              <tr><td style="padding:5px 8px;font-family:monospace">follow_executed</td><td style="text-align:center;padding:5px 8px">30</td><td style="text-align:center;padding:5px 8px"><span style="background:#fee2e2;color:#dc2626;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">high</span></td></tr>
+            </tbody>
+          </table>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Implementation</div>
+          <ul style="margin:0;padding:0;list-style:none;margin-bottom:14px">
+            <li style="font-size:12px;color:#475569;padding:3px 0;padding-left:14px;position:relative">
+              <span style="position:absolute;left:0;color:#94a3b8;font-size:10px">→</span>
+              Redis Sorted Set: <code style="font-size:11px;background:#f1f5f9;padding:1px 4px;border-radius:3px">ZADD user:{id}:{type} ts eventId</code>
+            </li>
+            <li style="font-size:12px;color:#475569;padding:3px 0;padding-left:14px;position:relative">
+              <span style="position:absolute;left:0;color:#94a3b8;font-size:10px">→</span>
+              Use <code style="font-size:11px;background:#f1f5f9;padding:1px 4px;border-radius:3px">ZCOUNT</code> within the time window to count events
+            </li>
+          </ul>
+
+          <div style="padding:10px 12px;background:#fef3c7;border-radius:6px">
+            <div style="font-size:11px;font-weight:600;color:#b45309;margin-bottom:6px">Output flags</div>
+            <div style="font-size:11px;font-family:'Courier New',monospace;color:#1e293b;line-height:1.8">
+              <span style="color:#b45309">"anomaly_detected"</span>: <span style="color:#16a34a">true</span>,<br>
+              <span style="color:#b45309">"anomaly_reason"</span>: <span style="color:#7c3aed">"rapid_consecutive_events"</span>,<br>
+              <span style="color:#b45309">"severity"</span>: <span style="color:#7c3aed">"high"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Bot Pattern -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header" style="background:#ede9fe;border-bottom-color:#ddd6fe">
+          <div>
+            <h3 style="color:#7c3aed">3 · Bot Pattern</h3>
+            <p><code style="font-size:11px">checkBotPattern(event)</code></p>
+          </div>
+          <span style="font-size:22px">🤖</span>
+        </div>
+        <div class="card-body" style="padding:16px 20px">
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What is this fraud?</div>
+          <p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:14px">Automated scripts performing actions that look human but exhibit characteristic patterns.</p>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Combined signals</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px">
+            <thead>
+              <tr style="background:#f8fafc">
+                <th style="text-align:left;padding:6px 8px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0">Signal</th>
+                <th style="text-align:left;padding:6px 8px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0">How to check</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-weight:500;color:#0f172a">Headless browser</td>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#475569">User-Agent contains <code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">HeadlessChrome</code>, <code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">Selenium</code></td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-weight:500;color:#0f172a">Too regular</td>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#475569"><code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">stddev(timestamps) &lt; threshold</code></td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-weight:500;color:#0f172a">Missing metadata</td>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#475569">No <code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">session_id</code> or <code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">referrer</code> present</td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;font-weight:500;color:#0f172a">Invalid sequence</td>
+                <td style="padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#475569"><code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">task_completed</code> without a preceding <code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">task_started</code></td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px;font-weight:500;color:#0f172a">Multi-account / IP</td>
+                <td style="padding:5px 8px;color:#475569">Multiple distinct <code style="font-size:10px;background:#f1f5f9;padding:1px 4px;border-radius:3px">user_id</code>s from the same IP within 1h</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Implementation</div>
+          <ul style="margin:0;padding:0;list-style:none;margin-bottom:14px">
+            <li style="font-size:12px;color:#475569;padding:3px 0;padding-left:14px;position:relative">
+              <span style="position:absolute;left:0;color:#94a3b8;font-size:10px">→</span>
+              Score-based: each signal adds to a cumulative score
+            </li>
+            <li style="font-size:12px;color:#475569;padding:3px 0;padding-left:14px;position:relative">
+              <span style="position:absolute;left:0;color:#94a3b8;font-size:10px">→</span>
+              Total score &gt; threshold → <code style="font-size:11px;background:#f1f5f9;padding:1px 4px;border-radius:3px">bot_suspected = true</code>
+            </li>
+          </ul>
+
+          <div style="padding:10px 12px;background:#ede9fe;border-radius:6px">
+            <div style="font-size:11px;font-weight:600;color:#7c3aed;margin-bottom:6px">Output flags</div>
+            <div style="font-size:11px;font-family:'Courier New',monospace;color:#1e293b;line-height:1.8">
+              <span style="color:#b45309">"bot_suspected"</span>: <span style="color:#16a34a">true</span>,<br>
+              <span style="color:#b45309">"bot_reason"</span>: <span style="color:#7c3aed">"headless_browser"</span>
+              <span style="color:#94a3b8"> // headless_browser | too_regular |</span><br>
+              <span style="color:#94a3b8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// missing_metadata | invalid_sequence |</span><br>
+              <span style="color:#94a3b8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// multi_account_ip</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- buildFraudSignals + Flow -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+      <!-- buildFraudSignals output -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <div>
+            <h3>buildFraudSignals(checks)</h3>
+            <p>Merge results from all 3 checks into a single object attached to the event</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;font-size:13px;line-height:1.8;color:#1e293b;margin:0">{
+  <span style="color:#16a34a">"fraud_signals"</span>: {
+    <span style="color:#b45309">"is_duplicate"</span>:    <span style="color:#16a34a">false</span>,
+    <span style="color:#b45309">"duplicate_of"</span>:    <span style="color:#94a3b8">null</span>,
+    <span style="color:#b45309">"anomaly_detected"</span>: <span style="color:#ef4444">true</span>,
+    <span style="color:#b45309">"anomaly_reason"</span>:  <span style="color:#7c3aed">"rapid_consecutive_events"</span>,
+    <span style="color:#b45309">"severity"</span>:        <span style="color:#7c3aed">"high"</span>,
+    <span style="color:#b45309">"bot_suspected"</span>:   <span style="color:#16a34a">false</span>
+  }
+}</pre>
+          <div style="margin-top:14px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:12px;color:#166534;line-height:1.6">
+            This object is stored in ClickHouse alongside the event. The backend / Guild service reads <code style="font-size:11px;background:#dcfce7;padding:1px 5px;border-radius:3px">fraud_signals</code> to decide: exclude from reward calculation, suspend the user, or trigger an admin alert.
+          </div>
+        </div>
+      </div>
+
+      <!-- Processing flow -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <div>
+            <h3>Processing Flow</h3>
+            <p>Processing order within the Tracking API</p>
+          </div>
+        </div>
+        <div class="card-body" style="padding:16px 20px">
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;border-radius:50%;background:#fee2e2;color:#dc2626;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:#0f172a">authenticateRequest()</div>
+                <div style="font-size:11px;color:#94a3b8">fail → 401</div>
+              </div>
+            </div>
+            <div style="margin-left:14px;width:1px;height:12px;background:#e2e8f0"></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;border-radius:50%;background:#fee2e2;color:#dc2626;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:#0f172a">validateEventSignature()</div>
+                <div style="font-size:11px;color:#94a3b8">fail → 401</div>
+              </div>
+            </div>
+            <div style="margin-left:14px;width:1px;height:12px;background:#e2e8f0"></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;border-radius:50%;background:#fee2e2;color:#dc2626;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:#0f172a">validateEventSchema()</div>
+                <div style="font-size:11px;color:#94a3b8">fail → 400</div>
+              </div>
+            </div>
+            <div style="margin-left:14px;width:1px;height:12px;background:#e2e8f0"></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;border-radius:50%;background:#fef3c7;color:#b45309;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">4</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:#0f172a;margin-bottom:6px">Parallel checks</div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="background:#eff6ff;border-radius:4px;padding:4px 10px;font-size:11px;color:#1d4ed8;font-weight:500">🔁 checkDuplicate() → is_duplicate</div>
+                  <div style="background:#fef3c7;border-radius:4px;padding:4px 10px;font-size:11px;color:#b45309;font-weight:500">⚡ checkAnomalyBehavior() → anomaly_detected</div>
+                  <div style="background:#ede9fe;border-radius:4px;padding:4px 10px;font-size:11px;color:#7c3aed;font-weight:500">🤖 checkBotPattern() → bot_suspected</div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-left:14px;width:1px;height:12px;background:#e2e8f0"></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;border-radius:50%;background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:#0f172a">buildFraudSignals()</div>
+                <div style="font-size:11px;color:#94a3b8">merge all flags into fraud_signals object</div>
+              </div>
+            </div>
+            <div style="margin-left:14px;width:1px;height:12px;background:#e2e8f0"></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;border-radius:50%;background:#dcfce7;color:#16a34a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">6</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:#0f172a">→ Kafka → ClickHouse</div>
+                <div style="font-size:11px;color:#16a34a;font-weight:600">ALWAYS written, even when flagged</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
