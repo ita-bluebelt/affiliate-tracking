@@ -186,7 +186,11 @@
       font-size: 12px;
       font-weight: 500;
       margin: 2px 3px 2px 0;
+      cursor: pointer;
+      transition: box-shadow 0.15s, transform 0.1s;
     }
+    .event-tag:hover { filter: brightness(0.93); transform: translateY(-1px); }
+    .event-tag.active { box-shadow: 0 0 0 2px currentColor; font-weight: 700; }
     .event-tag-dot { width: 6px; height: 6px; border-radius: 50%; }
 
     .tag-blue   { background: #dbeafe; color: #1d4ed8; }
@@ -373,16 +377,20 @@
             <rect x="511" y="35" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
             <text x="568" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">buildAuthHeader</text>
             <text x="568" y="66" text-anchor="middle" font-size="10" fill="#3b82f6">API key / S2S</text>
-            <!-- E401 oval cx=840 (aligned with GW1) -->
-            <rect x="780" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
-            <text x="840" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 401 Unauthorized</text>
-            <text x="840" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Auth / Sig failed</text>
+            <!-- B3_ENRICH cx=759 -->
+            <rect x="702" y="35" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+            <text x="759" y="52" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">enrichEventMetadata</text>
+            <text x="759" y="66" text-anchor="middle" font-size="10" fill="#3b82f6">ip · session · source</text>
+            <!-- E401 oval cx=920 (shifted right to clear B3_ENRICH) -->
+            <rect x="860" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="920" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 401 Unauthorized</text>
+            <text x="920" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Auth / Sig failed</text>
             <!-- E400 oval cx=1076 (aligned with GW2) -->
             <rect x="1016" y="37" width="120" height="36" rx="18" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
             <text x="1076" y="53" text-anchor="middle" font-size="11" font-weight="600" fill="#7f1d1d">&#10005; 400 Bad Schema</text>
             <text x="1076" y="67" text-anchor="middle" font-size="10" fill="#ef4444">Invalid schema</text>
             <!-- S2S label -->
-            <text x="574" y="106" text-anchor="start" font-size="9" fill="#94a3b8" font-style="italic">&#9660; POST /events &#xB7; server-to-server</text>
+            <text x="763" y="88" text-anchor="start" font-size="9" fill="#94a3b8" font-style="italic">&#9660; POST /events &#xB7; server-to-server</text>
 
             <!-- NODES: API Tracking lane (cy=220) -->
             <!-- A1 cx=568 directly below B2_AUTH -->
@@ -405,18 +413,14 @@
             <polygon points="1076,199 1097,220 1076,241 1055,220" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
             <text x="1076" y="217" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">Schema</text>
             <text x="1076" y="229" text-anchor="middle" font-size="10" font-weight="600" fill="#713f12">valid?</text>
-            <!-- A4 cx=1194 -->
-            <rect x="1137" y="200" width="114" height="40" rx="5" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
-            <text x="1194" y="217" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">enrichEventMetadata</text>
-            <text x="1194" y="231" text-anchor="middle" font-size="10" fill="#3b82f6">ip &#xB7; session &#xB7; source</text>
-            <!-- FRAUD cx=1351 -->
-            <rect x="1291" y="196" width="120" height="48" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
-            <text x="1351" y="214" text-anchor="middle" font-size="11" font-weight="600" fill="#78350f">Fraud Detection</text>
-            <text x="1351" y="228" text-anchor="middle" font-size="10" fill="#d97706">4 parallel checks</text>
-            <text x="1351" y="240" text-anchor="middle" font-size="9" fill="#b45309">dup &#xB7; anomaly &#xB7; bot &#xB7; IP</text>
+            <!-- FRAUD cx=1197 (replaces A4, shifts left) -->
+            <rect x="1137" y="196" width="120" height="48" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="1197" y="214" text-anchor="middle" font-size="11" font-weight="600" fill="#78350f">Fraud Detection</text>
+            <text x="1197" y="228" text-anchor="middle" font-size="10" fill="#d97706">4 parallel checks</text>
+            <text x="1197" y="240" text-anchor="middle" font-size="9" fill="#b45309">dup &#xB7; anomaly &#xB7; bot &#xB7; IP</text>
 
             <!-- NODES: KCH lane (cy=380) -->
-            <!-- K1 cx=1194 below A4 -->
+            <!-- K1 cx=1194 below FRAUD -->
             <rect x="1137" y="360" width="114" height="40" rx="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
             <text x="1194" y="377" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">publishToKafka</text>
             <text x="1194" y="391" text-anchor="middle" font-size="10" fill="#16a34a">consume &#xB7; 7d retention</text>
@@ -442,12 +446,13 @@
             <!-- EDGES -->
             <line x1="244" y1="55" x2="320" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <line x1="434" y1="55" x2="511" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <!-- B2_AUTH to A1: S2S straight down dashed -->
-            <path d="M 568 75 L 568 200" stroke="#64748b" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arr)"/>
+            <line x1="625" y1="55" x2="702" y2="55" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- B3_ENRICH to A1: S2S L-shaped dashed -->
+            <path d="M 759 75 L 759 145 L 568 145 L 568 200" stroke="#64748b" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arr)"/>
             <line x1="625" y1="220" x2="665" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <line x1="779" y1="220" x2="819" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <!-- GW1 fail to E401 -->
-            <path d="M 840 199 L 840 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+            <!-- GW1 fail to E401 (bent right to clear B3_ENRICH) -->
+            <path d="M 840 199 L 840 100 L 920 100 L 920 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
             <rect x="816" y="126" width="30" height="14" rx="2" fill="#fff7ed"/>
             <text x="831" y="136" text-anchor="middle" font-size="9" fill="#ef4444">&#10005; Fail</text>
             <!-- GW1 pass to A3 -->
@@ -458,12 +463,11 @@
             <path d="M 1076 199 L 1076 73" stroke="#ef4444" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
             <rect x="1053" y="126" width="30" height="14" rx="2" fill="#fff7ed"/>
             <text x="1068" y="136" text-anchor="middle" font-size="9" fill="#ef4444">&#10005; Fail</text>
-            <!-- GW2 pass to A4 -->
+            <!-- GW2 pass to FRAUD -->
             <line x1="1097" y1="220" x2="1137" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <text x="1117" y="214" text-anchor="middle" font-size="9" fill="#16a34a">&#10003;</text>
-            <line x1="1251" y1="220" x2="1291" y2="220" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
-            <!-- FRAUD to K1 cross-lane -->
-            <path d="M 1351 244 L 1351 310 L 1194 310 L 1194 360" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+            <!-- FRAUD to K1: straight down -->
+            <line x1="1197" y1="244" x2="1197" y2="360" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <line x1="1251" y1="380" x2="1291" y2="380" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
             <!-- C1 to GW3 cross-lane -->
             <path d="M 1351 400 L 1351 440 L 1264 440 L 1264 489" stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
@@ -524,7 +528,7 @@
           <div class="flow-step-num">4</div>
           <div class="flow-step-content">
             <h4>Metadata Enrichment</h4>
-            <p>Metadata attached: <code>ip</code>, <code>session_id</code>, <code>source</code>, <code>user_agent</code>, <code>schema_version</code>.</p>
+            <p>BuzzNet API Service attaches metadata before sending S2S to Tracking API: <code>ip</code>, <code>session_id</code>, <code>source</code>, <code>user_agent</code>, <code>schema_version</code>.</p>
           </div>
         </div>
         <div class="flow-step">
@@ -574,39 +578,36 @@
       <div class="card-body">
         <div class="event-grid">
           <div class="event-group">
-            <h4>User Actions</h4>
-            <span class="event-tag tag-blue">post_created</span>
-            <span class="event-tag tag-blue">share_executed</span>
-            <span class="event-tag tag-blue">comment_created</span>
-            <span class="event-tag tag-blue">follow_executed</span>
-          </div>
-          <div class="event-group">
-            <h4>Engagement Signals</h4>
-            <span class="event-tag tag-cyan">like_executed</span>
-            <span class="event-tag tag-cyan">link_clicked</span>
-            <span class="event-tag tag-cyan">media_viewed</span>
-            <span class="event-tag tag-cyan">reaction_added</span>
+            <h4>BuzzNet User Actions</h4>
+            <span class="event-tag tag-blue" data-event="like_executed"           onclick="selectEvent(this)">like_executed</span>
+            <span class="event-tag tag-blue" data-event="share_executed"          onclick="selectEvent(this)">share_executed</span>
+            <span class="event-tag tag-blue" data-event="comment_executed"        onclick="selectEvent(this)">comment_executed</span>
+            <span class="event-tag tag-blue" data-event="repost_executed"         onclick="selectEvent(this)">repost_executed</span>
+            <span class="event-tag tag-blue" data-event="follow_executed"         onclick="selectEvent(this)">follow_executed</span>
+            <span class="event-tag tag-blue" data-event="save_executed"           onclick="selectEvent(this)">save_executed</span>
+            <span class="event-tag tag-blue" data-event="task_skipped"            onclick="selectEvent(this)">task_skipped</span>
+            <span class="event-tag tag-blue" data-event="registration_executed"   onclick="selectEvent(this)">registration_executed</span>
+            <span class="event-tag tag-blue" data-event="sns_account_connected"   onclick="selectEvent(this)">sns_account_connected</span>
           </div>
           <div class="event-group">
             <h4>BuzzNet Core Events</h4>
-            <span class="event-tag tag-purple">task_assigned</span>
-            <span class="event-tag tag-purple">task_started</span>
-            <span class="event-tag tag-purple">task_completed</span>
-            <span class="event-tag tag-purple">content_viewed</span>
+            <span class="event-tag tag-purple" data-event="task_assigned"                  onclick="selectEvent(this)">task_assigned</span>
+            <span class="event-tag tag-purple" data-event="task_completed"                 onclick="selectEvent(this)">task_completed</span>
+            <span class="event-tag tag-purple" data-event="task_completed_streak_milestone" onclick="selectEvent(this)">task_completed_streak_milestone</span>
           </div>
           <div class="event-group">
             <h4>Retention & Identity</h4>
-            <span class="event-tag tag-green">login</span>
-            <span class="event-tag tag-green">active_day</span>
-            <span class="event-tag tag-green">streak_milestone</span>
-            <span class="event-tag tag-green">account_connected</span>
+            <span class="event-tag tag-green" data-event="login"            onclick="selectEvent(this)">login</span>
+            <span class="event-tag tag-green" data-event="active_day"       onclick="selectEvent(this)">active_day</span>
+            <span class="event-tag tag-green" data-event="streak_milestone" onclick="selectEvent(this)">streak_milestone</span>
+            <span class="event-tag tag-green" data-event="account_connected" onclick="selectEvent(this)">account_connected</span>
           </div>
           <div class="event-group">
             <h4>Guild & Rewards</h4>
-            <span class="event-tag tag-amber">guild_joined</span>
-            <span class="event-tag tag-amber">role_assigned</span>
-            <span class="event-tag tag-amber">reward_calculated</span>
-            <span class="event-tag tag-amber">payout_requested</span>
+            <span class="event-tag tag-amber" data-event="guild_joined"      onclick="selectEvent(this)">guild_joined</span>
+            <span class="event-tag tag-amber" data-event="role_assigned"     onclick="selectEvent(this)">role_assigned</span>
+            <span class="event-tag tag-amber" data-event="reward_calculated" onclick="selectEvent(this)">reward_calculated</span>
+            <span class="event-tag tag-amber" data-event="payout_requested"  onclick="selectEvent(this)">payout_requested</span>
           </div>
         </div>
       </div>
@@ -617,11 +618,11 @@
       <div class="card-header">
         <div>
           <h3>Event Data Schema (MVP)</h3>
-          <p>Minimum required fields for every event</p>
+          <p>Minimum required fields for every event &nbsp;·&nbsp; <span id="selected-event-label" style="font-size:12px;color:#6366f1;font-weight:600">Click an event above to preview its schema</span></p>
         </div>
       </div>
       <div class="card-body" style="overflow-x:auto">
-        <pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;font-size:13px;line-height:1.7;color:#1e293b">{
+        <pre id="event-schema-display" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:20px;font-size:13px;line-height:1.7;color:#1e293b">{
   <span style="color:#16a34a">"event_id"</span>:        <span style="color:#7c3aed">"uuid-v4"</span>,            <span style="color:#94a3b8">// Auto-generated</span>
   <span style="color:#16a34a">"user_id"</span>:         <span style="color:#7c3aed">"user_123"</span>,
   <span style="color:#16a34a">"guild_member_id"</span>: <span style="color:#7c3aed">"g_456"</span>,
@@ -654,7 +655,7 @@
   <div id="section-functions" class="section">
     <div class="section-header">
       <h2>Function List</h2>
-      <p>43 functions across 7 system layers</p>
+      <p>45 functions across 7 system layers</p>
     </div>
 
     <div class="card">
@@ -670,8 +671,20 @@
           </thead>
           <tbody>
             <tr>
+              <td><span class="layer-badge" style="background:#eff6ff;color:#1e40af">BuzzNet API Service</span></td>
+              <td><span class="func-count">3</span></td>
+              <td>
+                <ul class="func-list">
+                  <li>signEventPayload(event) — HMAC-SHA256</li>
+                  <li>buildAuthHeader(apiKey) — S2S / mutual TLS</li>
+                  <li>enrichEventMetadata(event, req) — ip · session · source</li>
+                </ul>
+              </td>
+              <td style="font-size:12px;color:#475569">S2S outgoing — sign, auth, enrich before send</td>
+            </tr>
+            <tr>
               <td><span class="layer-badge" style="background:#dbeafe;color:#1d4ed8">Tracking API</span></td>
-              <td><span class="func-count">8</span></td>
+              <td><span class="func-count">7</span></td>
               <td>
                 <ul class="func-list">
                   <li>POST /events · POST /events/batch</li>
@@ -680,7 +693,6 @@
                   <li>rateLimitCheck(userId, ip)</li>
                   <li>generateEventId()</li>
                   <li>signEvent(event) — HMAC-SHA256</li>
-                  <li>enrichEventMetadata(event, req)</li>
                 </ul>
               </td>
               <td style="font-size:12px;color:#475569">Ingestion, auth, validation, signing</td>
@@ -769,7 +781,7 @@
             </tr>
             <tr style="background:#f8fafc;font-weight:600">
               <td>Total</td>
-              <td><span class="func-count" style="color:#2563eb">43</span></td>
+              <td><span class="func-count" style="color:#2563eb">45</span></td>
               <td colspan="2" style="font-size:12px;color:#475569">Across 7 layers — MVP scope</td>
             </tr>
           </tbody>
@@ -906,6 +918,77 @@ gantt
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('section-' + name).classList.add('active');
     event.currentTarget.classList.add('active');
+  }
+
+  // ── Event Taxonomy: interactive schema preview ───────────────
+  const EVENT_SCHEMAS = {
+    // BuzzNet User Actions
+    like_executed:                    { platform: '"twitter"', content_id: '"post_123"', content_type: '"text"' },
+    share_executed:                   { platform: '"twitter"', share_url: '"https://x.com/user/post_123"', content_id: '"post_123"' },
+    comment_executed:                 { platform: '"twitter"', post_id: '"post_123"', comment_id: '"cmt_001"' },
+    repost_executed:                  { platform: '"twitter"', original_post_id: '"post_123"', post_url: '"https://x.com/user/repost_456"' },
+    follow_executed:                  { platform: '"twitter"', target_user_id: '"user_456"' },
+    save_executed:                    { platform: '"twitter"', content_id: '"post_123"', content_type: '"text"' },
+    task_skipped:                     { task_id: 50, task_type: '"post"', reason: '"not_interested"' },
+    registration_executed:            { platform: '"twitter"', referral_code: '"REF_001"' },
+    sns_account_connected:            { platform: '"twitter"', sns_account_id: '"twt_user_123"' },
+    // BuzzNet Core Events
+    task_assigned:                    { task_id: 50, task_type: '"post"' },
+    task_completed:                   { task_id: 50, proof_url: '"https://x.com/user/post_123"' },
+    task_completed_streak_milestone:  { task_id: 50, proof_url: '"https://x.com/user/post_123"', streak_count: 7, milestone: '"week_streak"' },
+    // Retention & Identity
+    login:             { device_type: '"mobile"', platform: '"ios"' },
+    active_day:        { day_sequence: 7 },
+    streak_milestone:  { streak_days: 30 },
+    account_connected: { platform: '"twitter"', account_id: '"twt_user_123"' },
+    // Guild & Rewards
+    guild_joined:      { guild_id: '"guild_99"', referrer_id: '"user_456"' },
+    role_assigned:     { guild_id: '"guild_99"', role_name: '"contributor"' },
+    reward_calculated: { reward_type: '"token"', amount: 100 },
+    payout_requested:  { amount: 50, method: '"crypto_wallet"' }
+  };
+
+  function _v(val) {
+    if (typeof val === 'number')  return `<span style="color:#b45309">${val}</span>`;
+    if (val === 'true' || val === 'false') return `<span style="color:#b45309">${val}</span>`;
+    return `<span style="color:#7c3aed">${val}</span>`;
+  }
+
+  function buildSchemaHtml(eventType) {
+    const props = EVENT_SCHEMAS[eventType] || {};
+    const propsLines = Object.entries(props)
+      .map(([k, v], i, arr) => `    <span style="color:#0e7490">"${k}"</span>: ${_v(v)}${i < arr.length - 1 ? ',' : ''}`)
+      .join('\n');
+    return `{\n` +
+      `  <span style="color:#16a34a">"event_id"</span>:        <span style="color:#7c3aed">"uuid-v4"</span>,            <span style="color:#94a3b8">// Auto-generated</span>\n` +
+      `  <span style="color:#16a34a">"user_id"</span>:         <span style="color:#7c3aed">"user_123"</span>,\n` +
+      `  <span style="color:#16a34a">"guild_member_id"</span>: <span style="color:#7c3aed">"g_456"</span>,\n` +
+      `  <span style="color:#16a34a">"campaign_id"</span>:      <span style="color:#b45309">1001</span>,\n` +
+      `  <span style="color:#16a34a">"event_type"</span>:      <span style="color:#7c3aed">"${eventType}"</span>,\n` +
+      `  <span style="color:#16a34a">"timestamp"</span>:       <span style="color:#7c3aed">"2026-03-21T10:00:00Z"</span>,\n` +
+      `  <span style="color:#16a34a">"schema_version"</span>:  <span style="color:#7c3aed">"1.0"</span>,\n` +
+      `  <span style="color:#16a34a">"properties"</span>: {\n${propsLines}\n  },\n` +
+      `  <span style="color:#16a34a">"metadata"</span>: {\n` +
+      `    <span style="color:#0e7490">"source"</span>:     <span style="color:#7c3aed">"buzznet-web"</span>,\n` +
+      `    <span style="color:#0e7490">"ip"</span>:         <span style="color:#7c3aed">"192.168.1.1"</span>,\n` +
+      `    <span style="color:#0e7490">"session_id"</span>: <span style="color:#7c3aed">"sess_abc"</span>\n` +
+      `  },\n` +
+      `  <span style="color:#16a34a">"fraud_signals"</span>: {\n` +
+      `    <span style="color:#b45309">"is_duplicate"</span>:    false,\n` +
+      `    <span style="color:#b45309">"anomaly_detected"</span>: false,\n` +
+      `    <span style="color:#b45309">"bot_suspected"</span>:   false,\n` +
+      `    <span style="color:#b45309">"ip_flagged"</span>:      false\n` +
+      `  },\n` +
+      `  <span style="color:#16a34a">"hmac_signature"</span>: <span style="color:#7c3aed">"sha256:abc123..."</span>   <span style="color:#94a3b8">// Tamper-proof</span>\n` +
+      `}`;
+  }
+
+  function selectEvent(el) {
+    document.querySelectorAll('.event-tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const eventType = el.getAttribute('data-event');
+    document.getElementById('event-schema-display').innerHTML = buildSchemaHtml(eventType);
+    document.getElementById('selected-event-label').textContent = 'Showing: ' + eventType;
   }
 </script>
 </body>
