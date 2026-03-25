@@ -597,17 +597,9 @@
           </div>
           <div class="event-group">
             <h4>Retention & Identity</h4>
-            <span class="event-tag tag-green" data-event="login"            onclick="selectEvent(this)">login</span>
-            <span class="event-tag tag-green" data-event="active_day"       onclick="selectEvent(this)">active_day</span>
-            <span class="event-tag tag-green" data-event="streak_milestone" onclick="selectEvent(this)">streak_milestone</span>
-            <span class="event-tag tag-green" data-event="account_connected" onclick="selectEvent(this)">account_connected</span>
           </div>
           <div class="event-group">
             <h4>Guild & Rewards</h4>
-            <span class="event-tag tag-amber" data-event="guild_joined"      onclick="selectEvent(this)">guild_joined</span>
-            <span class="event-tag tag-amber" data-event="role_assigned"     onclick="selectEvent(this)">role_assigned</span>
-            <span class="event-tag tag-amber" data-event="reward_calculated" onclick="selectEvent(this)">reward_calculated</span>
-            <span class="event-tag tag-amber" data-event="payout_requested"  onclick="selectEvent(this)">payout_requested</span>
           </div>
         </div>
       </div>
@@ -936,16 +928,8 @@ gantt
     task_assigned:                    { task_id: 50, task_type: '"post"' },
     task_completed:                   { task_id: 50, proof_url: '"https://x.com/user/post_123"' },
     task_completed_streak_milestone:  { task_id: 50, proof_url: '"https://x.com/user/post_123"', streak_count: 7, milestone: '"week_streak"' },
-    // Retention & Identity
-    login:             { device_type: '"mobile"', platform: '"ios"' },
-    active_day:        { day_sequence: 7 },
-    streak_milestone:  { streak_days: 30 },
-    account_connected: { platform: '"twitter"', account_id: '"twt_user_123"' },
-    // Guild & Rewards
-    guild_joined:      { guild_id: '"guild_99"', referrer_id: '"user_456"' },
-    role_assigned:     { guild_id: '"guild_99"', role_name: '"contributor"' },
-    reward_calculated: { reward_type: '"token"', amount: 100 },
-    payout_requested:  { amount: 50, method: '"crypto_wallet"' }
+    // Retention & Identity — events TBD
+    // Guild & Rewards — events TBD
   };
 
   function _v(val) {
