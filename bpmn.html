@@ -628,15 +628,19 @@
     <span style="color:#0e7490">"proof_url"</span>: <span style="color:#7c3aed">"https://x.com/..."</span>
   },
   <span style="color:#16a34a">"metadata"</span>: {
-    <span style="color:#0e7490">"source"</span>:     <span style="color:#7c3aed">"buzznet-web"</span>,
-    <span style="color:#0e7490">"ip"</span>:         <span style="color:#7c3aed">"192.168.1.1"</span>,
-    <span style="color:#0e7490">"session_id"</span>: <span style="color:#7c3aed">"sess_abc"</span>
+    <span style="color:#0e7490">"source"</span>:         <span style="color:#7c3aed">"buzznet-web"</span>,       <span style="color:#94a3b8">// buzznet-web | buzznet-ios | buzznet-android</span>
+    <span style="color:#0e7490">"ip"</span>:             <span style="color:#7c3aed">"203.113.152.44"</span>,
+    <span style="color:#0e7490">"session_id"</span>:     <span style="color:#7c3aed">"sess_a3f92b1c"</span>,
+    <span style="color:#0e7490">"user_agent"</span>:     <span style="color:#7c3aed">"Mozilla/5.0 ... Chrome/123.0"</span>
   },
   <span style="color:#16a34a">"fraud_signals"</span>: {
     <span style="color:#b45309">"is_duplicate"</span>:    false,
+    <span style="color:#b45309">"duplicate_of"</span>:    <span style="color:#94a3b8">null</span>,
     <span style="color:#b45309">"anomaly_detected"</span>: false,
-    <span style="color:#b45309">"bot_suspected"</span>:   false,
-    <span style="color:#b45309">"ip_flagged"</span>:      false
+    <span style="color:#b45309">"anomaly_reason"</span>:  <span style="color:#94a3b8">null</span>,               <span style="color:#94a3b8">// rapid_consecutive_events</span>
+    <span style="color:#b45309">"severity"</span>:       <span style="color:#94a3b8">null</span>,               <span style="color:#94a3b8">// low | medium | high</span>
+    <span style="color:#b45309">"bot_suspected"</span>:  false,
+    <span style="color:#b45309">"bot_reason"</span>:     <span style="color:#94a3b8">null</span>                <span style="color:#94a3b8">// headless_browser | too_regular | missing_metadata | invalid_sequence | multi_account_ip</span>
   },
   <span style="color:#16a34a">"hmac_signature"</span>: <span style="color:#7c3aed">"sha256:abc123..."</span>   <span style="color:#94a3b8">// Tamper-proof</span>
 }</pre>
