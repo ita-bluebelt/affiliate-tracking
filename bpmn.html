@@ -580,24 +580,29 @@
         <div class="event-grid">
           <div class="event-group">
             <h4>BuzzNet User Actions</h4>
+            <span class="event-tag tag-blue" data-event="post_executed"           onclick="selectEvent(this)">post_executed</span>
             <span class="event-tag tag-blue" data-event="like_executed"           onclick="selectEvent(this)">like_executed</span>
             <span class="event-tag tag-blue" data-event="share_executed"          onclick="selectEvent(this)">share_executed</span>
             <span class="event-tag tag-blue" data-event="comment_executed"        onclick="selectEvent(this)">comment_executed</span>
             <span class="event-tag tag-blue" data-event="repost_executed"         onclick="selectEvent(this)">repost_executed</span>
             <span class="event-tag tag-blue" data-event="follow_executed"         onclick="selectEvent(this)">follow_executed</span>
+            <span class="event-tag tag-blue" data-event="duet_executed"           onclick="selectEvent(this)">duet_executed</span>
             <span class="event-tag tag-blue" data-event="save_executed"           onclick="selectEvent(this)">save_executed</span>
-            <span class="event-tag tag-blue" data-event="task_skipped"            onclick="selectEvent(this)">task_skipped</span>
-            <span class="event-tag tag-blue" data-event="registration_executed"   onclick="selectEvent(this)">registration_executed</span>
-            <span class="event-tag tag-blue" data-event="sns_account_connected"   onclick="selectEvent(this)">sns_account_connected</span>
+            <span class="event-tag tag-blue" data-event="action_skipped"          onclick="selectEvent(this)">action_skipped</span>
           </div>
           <div class="event-group">
-            <h4>BuzzNet Core Events</h4>
+            <h4>BuzzNet Identity</h4>
+            <span class="event-tag tag-cyan" data-event="registration_executed"   onclick="selectEvent(this)">registration_executed</span>
+            <span class="event-tag tag-cyan" data-event="sns_account_connected"   onclick="selectEvent(this)">sns_account_connected</span>
+          </div>
+          <div class="event-group">
+            <h4>BuzzNet Tasks</h4>
+            <span class="event-tag tag-purple" data-event="task_overdue"                   onclick="selectEvent(this)">task_overdue</span>
+            <span class="event-tag tag-purple" data-event="task_incomplete"                onclick="selectEvent(this)">task_incomplete</span>
+            <span class="event-tag tag-purple" data-event="task_skipped"                   onclick="selectEvent(this)">task_skipped</span>
             <span class="event-tag tag-purple" data-event="task_assigned"                  onclick="selectEvent(this)">task_assigned</span>
             <span class="event-tag tag-purple" data-event="task_completed"                 onclick="selectEvent(this)">task_completed</span>
             <span class="event-tag tag-purple" data-event="task_completed_streak_milestone" onclick="selectEvent(this)">task_completed_streak_milestone</span>
-          </div>
-          <div class="event-group">
-            <h4>Retention & Identity</h4>
           </div>
           <div class="event-group">
             <h4>Guild & Rewards</h4>
@@ -1222,27 +1227,45 @@ gantt
   // ── Event Taxonomy: interactive schema preview ───────────────
   const EVENT_SCHEMAS = {
     // BuzzNet User Actions
-    like_executed:                    { platform: '"twitter"', content_id: '"post_123"', content_type: '"text"' },
-    share_executed:                   { platform: '"twitter"', share_url: '"https://x.com/user/post_123"', content_id: '"post_123"' },
-    comment_executed:                 { platform: '"twitter"', post_id: '"post_123"', comment_id: '"cmt_001"' },
-    repost_executed:                  { platform: '"twitter"', original_post_id: '"post_123"', post_url: '"https://x.com/user/repost_456"' },
-    follow_executed:                  { platform: '"twitter"', target_user_id: '"user_456"' },
-    save_executed:                    { platform: '"twitter"', content_id: '"post_123"', content_type: '"text"' },
-    task_skipped:                     { task_id: 50, task_type: '"post"', reason: '"not_interested"' },
-    registration_executed:            { platform: '"twitter"', referral_code: '"REF_001"' },
+    post_executed:                    { task_id: 50, platform: '"twitter"', post_url: '"https://x.com/user/post_123"'},
+    like_executed:                    { task_id: 50, platform: '"twitter"', target_post_url: '"https://x.com/user/post_123"'},
+    share_executed:                   { task_id: 50, platform: '"twitter"', share_url: '"https://x.com/user/post_123"', target_post_url: '"https://x.com/user/post_123"'},
+    comment_executed:                 { task_id: 50, platform: '"twitter"', target_post_url: '"https://x.com/user/post_123"'},
+    repost_executed:                  { task_id: 50, platform: '"twitter"', original_post_url: '"https://x.com/user/post_123"', post_url: '"https://x.com/user/repost_456"' },
+    follow_executed:                  { task_id: 50, platform: '"twitter"', target_page_url: '"https://x.com/user"' },
+    duet_executed:                    { task_id: 50, platform: '"tiktok"', original_video_url: '"https://tiktok.com/@user/video/123"', duet_url: '"https://tiktok.com/@user/video/456"' },
+    save_executed:                    { task_id: 50, platform: '"twitter"', target_post_url: '"https://x.com/user/post_123"'},
+    action_skipped:                   { task_id: 50, action_type: '"like"'},
+    // BuzzNet Identity
+    registration_executed:            { platform: { val: '"google"', comment: 'apple | google | email_password' } },
     sns_account_connected:            { platform: '"twitter"', sns_account_id: '"twt_user_123"' },
-    // BuzzNet Core Events
-    task_assigned:                    { task_id: 50, task_type: '"post"' },
+    // BuzzNet Tasks
+    task_overdue:                     { task_id: 50, task_type: { val: '"reaction"', comment: 'reaction | influencer_personal_post | influencer_company_post' }, due_at: '"2026-03-21T10:00:00Z"' },
+    task_incomplete: {
+      task_id: 50,
+      task_type: { val: '"reaction"', comment: 'reaction | influencer_personal_post | influencer_company_post' },
+      target_url: '"https://x.com/target/post_123"',
+      required_actions: ['"like"', '"share"', '"comment"'],
+      completed_actions: ['"like"'],
+      reason: { val: '"overdue"', comment: 'overdue | proof_missing | expired' }
+    },
+    task_skipped:                     { task_id: 50, task_type: { val: '"reaction"', comment: 'reaction | influencer_personal_post | influencer_company_post' }},
+    task_assigned:                    { task_id: 50, task_type: { val: '"reaction"', comment: 'reaction | influencer_personal_post | influencer_company_post' } },
     task_completed:                   { task_id: 50, proof_url: '"https://x.com/user/post_123"' },
     task_completed_streak_milestone:  { task_id: 50, proof_url: '"https://x.com/user/post_123"', milestone_days: 7 },
-    // Retention & Identity — events TBD
     // Guild & Rewards — events TBD
   };
 
-  function _v(val) {
+  function _vRaw(val) {
+    if (Array.isArray(val)) return '[' + val.map(item => _vRaw(item)).join(', ') + ']';
     if (typeof val === 'number')  return `<span style="color:#b45309">${val}</span>`;
     if (val === 'true' || val === 'false') return `<span style="color:#b45309">${val}</span>`;
     return `<span style="color:#7c3aed">${val}</span>`;
+  }
+  function _v(val) {
+    if (val !== null && typeof val === 'object' && !Array.isArray(val) && 'val' in val)
+      return `${_vRaw(val.val)}   <span style="color:#94a3b8">// ${val.comment}</span>`;
+    return _vRaw(val);
   }
 
   function buildSchemaHtml(eventType) {
@@ -1260,15 +1283,19 @@ gantt
       `  <span style="color:#16a34a">"schema_version"</span>:  <span style="color:#7c3aed">"1.0"</span>,\n` +
       `  <span style="color:#16a34a">"properties"</span>: {\n${propsLines}\n  },\n` +
       `  <span style="color:#16a34a">"metadata"</span>: {\n` +
-      `    <span style="color:#0e7490">"source"</span>:     <span style="color:#7c3aed">"buzznet-web"</span>,\n` +
-      `    <span style="color:#0e7490">"ip"</span>:         <span style="color:#7c3aed">"192.168.1.1"</span>,\n` +
-      `    <span style="color:#0e7490">"session_id"</span>: <span style="color:#7c3aed">"sess_abc"</span>\n` +
+      `    <span style="color:#0e7490">"source"</span>:       <span style="color:#7c3aed">"buzznet-web"</span>,       <span style="color:#94a3b8">// buzznet-web | buzznet-ios | buzznet-android</span>\n` +
+      `    <span style="color:#0e7490">"ip"</span>:           <span style="color:#7c3aed">"203.113.152.44"</span>,\n` +
+      `    <span style="color:#0e7490">"session_id"</span>:   <span style="color:#7c3aed">"sess_a3f92b1c"</span>,\n` +
+      `    <span style="color:#0e7490">"user_agent"</span>:   <span style="color:#7c3aed">"Mozilla/5.0 ... Chrome/123.0"</span>\n` +
       `  },\n` +
       `  <span style="color:#16a34a">"fraud_signals"</span>: {\n` +
       `    <span style="color:#b45309">"is_duplicate"</span>:    false,\n` +
+      `    <span style="color:#b45309">"duplicate_of"</span>:    <span style="color:#94a3b8">null</span>,\n` +
       `    <span style="color:#b45309">"anomaly_detected"</span>: false,\n` +
-      `    <span style="color:#b45309">"bot_suspected"</span>:   false,\n` +
-      `    <span style="color:#b45309">"ip_flagged"</span>:      false\n` +
+      `    <span style="color:#b45309">"anomaly_reason"</span>:  <span style="color:#94a3b8">null</span>,               <span style="color:#94a3b8">// rapid_consecutive_events</span>\n` +
+      `    <span style="color:#b45309">"severity"</span>:       <span style="color:#94a3b8">null</span>,               <span style="color:#94a3b8">// low | medium | high</span>\n` +
+      `    <span style="color:#b45309">"bot_suspected"</span>:  false,\n` +
+      `    <span style="color:#b45309">"bot_reason"</span>:     <span style="color:#94a3b8">null</span>                <span style="color:#94a3b8">// headless_browser | too_regular | missing_metadata | invalid_sequence | multi_account_ip</span>\n` +
       `  },\n` +
       `  <span style="color:#16a34a">"hmac_signature"</span>: <span style="color:#7c3aed">"sha256:abc123..."</span>   <span style="color:#94a3b8">// Tamper-proof</span>\n` +
       `}`;
